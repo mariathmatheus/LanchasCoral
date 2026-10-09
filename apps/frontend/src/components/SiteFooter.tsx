@@ -123,7 +123,7 @@ export default async function SiteFooter({ locale = 'pt' }: { locale?: Locale } 
                   <Link
                     prefetch={false}
                     href={l.href}
-                    className="inline-flex min-h-8 min-w-11 items-center text-sm text-on-dark-muted transition-colors hover:text-pearl-0"
+                    className="inline-flex min-h-11 min-w-11 items-center text-sm text-on-dark-muted transition-colors hover:text-pearl-0"
                   >
                     {l.label}
                   </Link>
@@ -137,12 +137,15 @@ export default async function SiteFooter({ locale = 'pt' }: { locale?: Locale } 
       <div className="container-page">
         <div className="flex flex-wrap justify-between gap-4 border-t border-[var(--border-on-dark)] py-6 text-xs text-on-dark-muted">
           <span>© {year} {t.footer.rights}</span>
-          <span className="flex flex-wrap gap-x-2">
-            <Link prefetch={false} href={href('privacidade', locale)} className="inline-flex min-h-8 items-center transition-colors hover:text-pearl-0">
+          {/* `items-center` na linha: os links tem 44px de alvo de toque, e sem
+              isto o separador ficava preso ao topo da linha, flutuando acima do
+              texto em vez de sentar entre os dois. */}
+          <span className="flex flex-wrap items-center gap-x-2">
+            <Link prefetch={false} href={href('privacidade', locale)} className="inline-flex min-h-11 items-center transition-colors hover:text-pearl-0">
               {t.footer.privacy}
             </Link>
             <span aria-hidden>·</span>
-            <Link prefetch={false} href={href('qualidade', locale)} className="inline-flex min-h-8 items-center transition-colors hover:text-pearl-0">
+            <Link prefetch={false} href={href('qualidade', locale)} className="inline-flex min-h-11 items-center transition-colors hover:text-pearl-0">
               {t.footer.quality}
             </Link>
           </span>

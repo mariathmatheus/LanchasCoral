@@ -53,7 +53,7 @@ export default function BotaoEnviarMemorial({
             type="button"
             onClick={() => setConfirmandoReenvio(true)}
             disabled={Boolean(desabilitadoPorque)}
-            className="inline-flex min-h-9 items-center gap-2 rounded-[var(--radius-pill)] border border-[var(--border-strong)] px-3.5 py-1.5 text-xs font-semibold text-[var(--color-text-body)] transition-colors duration-[140ms] hover:bg-[var(--surface-sunken)] disabled:cursor-not-allowed disabled:opacity-40"
+            className="btn-press inline-flex min-h-9 items-center gap-2 rounded-[var(--radius-pill)] border border-[var(--border-strong)] px-3.5 py-1.5 text-xs font-semibold text-[var(--color-text-body)] transition-colors duration-[140ms] hover:bg-[var(--surface-sunken)] disabled:cursor-not-allowed disabled:opacity-40"
           >
             Enviar de novo
           </button>
@@ -112,7 +112,7 @@ function Botao({ jaEnviado, impedido }: { jaEnviado: boolean; impedido?: string 
     <button
       type="submit"
       disabled={pending || Boolean(impedido)}
-      className={`inline-flex min-h-9 items-center gap-2 rounded-[var(--radius-pill)] px-3.5 py-1.5 text-xs font-semibold transition-colors duration-[140ms] disabled:cursor-not-allowed disabled:opacity-40 ${
+      className={`btn-press inline-flex min-h-9 items-center gap-2 rounded-[var(--radius-pill)] px-3.5 py-1.5 text-xs font-semibold transition-colors duration-[140ms] disabled:cursor-not-allowed disabled:opacity-40 ${
         jaEnviado
           ? 'border border-[var(--border-strong)] text-[var(--color-text-body)] hover:bg-[var(--surface-sunken)]'
           : 'bg-ocean-700 text-pearl-0 hover:bg-ocean-600'

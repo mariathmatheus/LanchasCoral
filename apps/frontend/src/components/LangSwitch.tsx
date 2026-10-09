@@ -80,7 +80,7 @@ export default function LangSwitch({ current }: { current: Locale }) {
             // `px-1.5` ate `xl`: entre 1024 e 1280px a navbar desktop fica no
             // limite do container, e o respiro lateral daqui e o que sobra
             // para cortar sem encolher fonte nem esconder o rotulo BR/US.
-            className={`flex min-h-9 items-center gap-1.5 rounded-[var(--radius-xs)] px-1.5 py-2 transition-all duration-[140ms] xl:px-2.5 ${
+            className={`flex min-h-11 items-center gap-1.5 rounded-[var(--radius-xs)] px-1.5 py-2 transition-all duration-[140ms] xl:px-2.5 ${
               active
                 ? 'bg-white/12 opacity-100'
                 : // 45% rebaixava o branco a #777980 = 4.49:1, um fio abaixo do

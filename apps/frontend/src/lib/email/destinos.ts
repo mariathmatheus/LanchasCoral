@@ -34,7 +34,16 @@ const POR_TIPO: Record<string, Caixa> = {
   MANUAL: CAIXAS.assistencia,
   SERVICOS: CAIXAS.assistencia,
   TRABALHE: CAIXAS.dp,
-  ANUNCIAR: CAIXAS.compras,
+  /* Quem quer ANUNCIAR a propria lancha fala com o comercial, nao com
+     compras. `compras@` e descrito no site como "fornecimento de pecas,
+     insumos e parcerias com o estaleiro": quem le aquela caixa nao e quem
+     intermedia a venda de um seminovo, e o pedido chegaria a um setor que
+     nao tem o que fazer com ele. O Broker e operacao comercial. */
+  ANUNCIAR: CAIXAS.comercial,
+  /* Aceitos pelo schema e ainda sem formulario proprio; declarados para que
+     um `kind` novo nao dependa do fallback silencioso. */
+  BROKER: CAIXAS.comercial,
+  VISITA: CAIXAS.comercial,
 }
 
 /**

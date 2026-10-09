@@ -48,8 +48,24 @@ export function Logo({
 
 /* ---------------------------------------------------------------- Button */
 
+/*
+ * Movimento do botao: ele AFUNDA quando pressionado, e nao sobe no hover.
+ *
+ * A versao anterior subia 2px sob o cursor (`hover:-translate-y-0.5`), que e o
+ * oposto do que um botao fisico faz — botao apertado desce. Sob o dedo, no
+ * celular, aquele movimento nem existia: `hover` nao dispara no toque, entao a
+ * unica resposta ao toque era nenhuma.
+ *
+ * Agora o hover so muda cor, e `active` faz o que o gesto pede: 1px para baixo
+ * com sombra interna, igual em mouse e em toque. `duration-75` no transform
+ * porque afundar tem de ser imediato; a cor pode levar os 240ms de sempre.
+ *
+ * O movimento em si mora em `.btn-press`, no globals.css, porque vários botões
+ * do site sao `<button>` de formulario que nunca passam por aqui (enviar,
+ * buscar, o painel administrativo) — e as animacoes precisavam ser a MESMA.
+ */
 const BTN_BASE =
-  'group/btn relative inline-flex items-center justify-center gap-2.5 overflow-hidden whitespace-nowrap rounded-[var(--radius-pill)] border font-body font-semibold uppercase tracking-[0.06em] transition-[transform,box-shadow,background-color,border-color,color] duration-[240ms] ease-[var(--ease-glide)] hover:-translate-y-0.5 active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-40'
+  'btn-press group/btn relative inline-flex items-center justify-center gap-2.5 overflow-hidden whitespace-nowrap rounded-[var(--radius-pill)] border font-body font-semibold uppercase tracking-[0.06em] disabled:opacity-40'
 
 const BTN_SIZE = {
   sm: 'h-10 px-5 text-[11px]',
@@ -61,18 +77,28 @@ const BTN_SIZE = {
 } as const
 
 /*
- * Preenchimento em gradiente com brilho colorido no hover. O sistema original
- * era chapado; a leitura em tela ficou sem hierarquia entre as acoes.
+ * Preenchimento CHAPADO, no azul da marca.
+ *
+ * O gradiente saiu: sobre a pilula ele lia como efeito, nao como cor — a peca
+ * ficava com aparencia datada e, pior, a cor do botao mudava conforme a
+ * largura do rotulo, entao dois botoes lado a lado nunca eram o mesmo azul.
+ * Chapado, `primary` e `signature` sao a mesma familia em dois pesos: o
+ * ocean-700 conduz, o ocean-600 mais claro assina a acao principal.
+ *
+ * `active:` completa o gesto que a base descreve — a sombra vira interna, como
+ * a de uma tecla afundada, e o tom escurece um degrau.
  */
 const BTN_VARIANT = {
   primary:
-    'border-0 bg-[image:var(--grad-ocean)] text-pearl-0 shadow-[var(--shadow-sm)] hover:shadow-[var(--glow-aqua)]',
+    'border-0 bg-ocean-700 text-pearl-0 shadow-[var(--shadow-sm)] hover:bg-ocean-600 active:bg-ocean-800',
   signature:
-    'border-0 bg-[image:var(--grad-signature)] text-pearl-0 shadow-[var(--shadow-sm)] hover:shadow-[var(--glow-signature)]',
+    'border-0 bg-ocean-600 text-pearl-0 shadow-[var(--shadow-sm)] hover:bg-ocean-500 active:bg-ocean-700',
   outline:
-    'border-[var(--border-strong)] bg-transparent text-[var(--text-strong)] hover:border-ocean-700 hover:bg-pearl-100 hover:shadow-[var(--shadow-sm)]',
+    'border-[var(--border-strong)] bg-transparent text-[var(--text-strong)] hover:border-ocean-700 hover:bg-pearl-100 active:bg-pearl-200',
+  /* Sobre fundo escuro a sombra interna preta nao aparece; o afundar fica por
+     conta do deslocamento e do fundo que acende um degrau a mais. */
   'outline-inverse':
-    'border-white/45 bg-transparent text-pearl-0 hover:border-aqua-400 hover:bg-aqua-500/10 hover:text-white',
+    'border-white/45 bg-transparent text-pearl-0 hover:border-aqua-400 hover:bg-aqua-500/10 hover:text-white active:bg-aqua-500/20',
   ghost: 'border-0 bg-transparent px-2 text-ocean-700 hover:text-aqua-600',
 } as const
 
@@ -103,12 +129,96 @@ export function Button({
   )
 }
 
+/**
+ * O mesmo botao, como `<button>` de formulario.
+ *
+ * `Button` e um `<Link>` — serve para navegar, nao para enviar. Os botoes de
+ * envio do site (proposta, busca do estoque, painel) precisavam do mesmo
+ * tamanho, da mesma cor e do mesmo movimento, e cada um repetia as classes
+ * por conta propria: as tres copias divergiram. Aqui as duas formas leem do
+ * MESMO `BTN_BASE`, `BTN_SIZE` e `BTN_VARIANT`.
+ */
+export function SubmitButton({
+  variant = 'signature',
+  size = 'md',
+  fullWidth = false,
+  className = '',
+  children,
+  ...props
+}: ComponentProps<'button'> & {
+  variant?: ButtonVariant
+  size?: ButtonSize
+  fullWidth?: boolean
+}) {
+  return (
+    /* `type="submit"` antes do spread: e o uso esperado deste componente, mas
+       quem chama pode passar `type="button"` e sobrescrever. Sem o padrao, um
+       botao dentro de <form> envia por acidente em alguns navegadores. */
+    <button
+      type="submit"
+      {...props}
+      className={`${BTN_BASE} ${BTN_SIZE[size]} ${BTN_VARIANT[variant]} ${
+        fullWidth ? 'w-full' : ''
+      } ${className}`}
+    >
+      {children}
+    </button>
+  )
+}
+
+/* ------------------------------------------------------------ IconButton */
+
+const ICON_BTN_TONE = {
+  /** Sobre superficie clara — fechar dialogo, acao discreta. */
+  light:
+    'text-[var(--text-muted)] hover:bg-[var(--surface-sunken)] hover:text-[var(--text-strong)]',
+  /** Sobre foto ou fundo escuro — controles da galeria. */
+  dark: 'text-white/70 hover:bg-white/10 hover:text-white',
+  /** Sobre a propria foto, com fundo proprio para destacar do conteudo. */
+  overlay: 'bg-navy-900/45 text-pearl-0 backdrop-blur-sm hover:bg-navy-900/70',
+} as const
+
+/**
+ * Botao que carrega so um icone.
+ *
+ * Existe como componente porque o site tem varios — fechar o pop-up, avancar
+ * a galeria, ampliar, marcar para comparar — e cada um repetia o proprio
+ * tamanho e a propria animacao, que divergiam entre si. Aqui o alvo de 44px
+ * e o movimento de `.btn-press` valem para todos.
+ *
+ * `rotulo` vira `aria-label`: um botao sem texto precisa dele para o leitor
+ * de tela anunciar o que faz.
+ */
+export function IconButton({
+  rotulo,
+  tone = 'light',
+  className = '',
+  children,
+  ...props
+}: ComponentProps<'button'> & {
+  rotulo: string
+  tone?: keyof typeof ICON_BTN_TONE
+}) {
+  return (
+    <button
+      type="button"
+      aria-label={rotulo}
+      {...props}
+      className={`btn-press inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-[var(--radius-pill)] disabled:opacity-30 disabled:hover:bg-transparent ${ICON_BTN_TONE[tone]} ${className}`}
+    >
+      {children}
+    </button>
+  )
+}
+
 /* ----------------------------------------------------------------- Badge */
 
 const BADGE_TONE = {
   ocean: 'bg-ocean-100 text-ocean-800 border-transparent',
   aqua: 'bg-aqua-100 text-aqua-600 border-transparent',
-  lime: 'bg-[image:var(--grad-signature)] text-pearl-0 border-0',
+  /* Chapado como os botoes: o gradiente saiu do sistema, e a etiqueta ao lado
+     de um botao azul chapado nao pode ser a unica peca degradê da tela. */
+  lime: 'bg-ocean-600 text-pearl-0 border-0',
   navy: 'bg-navy-900 text-pearl-0 border-transparent',
   neutral: 'bg-pearl-100 text-[var(--color-text-body)] border-transparent',
   outline: 'bg-transparent text-[var(--text-muted)] border-[var(--border-subtle)]',

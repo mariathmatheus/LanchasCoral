@@ -11,13 +11,17 @@ const nextConfig: NextConfig = {
 
   images: {
     // Legacy media still served from the WordPress host during migration.
-    remotePatterns: [
-      { protocol: 'https', hostname: 'lanchascoral.com.br', pathname: '/wp-content/uploads/**' },
-      // Fotos dos seminovos, ainda servidas pelo subdominio do broker.
-      { protocol: 'https', hostname: 'broker.lanchascoral.com.br', pathname: '/wp-content/uploads/**' },
-      // Fotos adicionais das galerias, vindas da versao de referencia.
-      { protocol: 'https', hostname: 'mariath.dev', pathname: '/wp-content/uploads/**' },
-    ],
+    /*
+     * Nenhuma origem remota.
+     *
+     * O catalogo nasceu apontando para os WordPress antigos. Enquanto eles
+     * respondiam o site funcionava; quando `mariath.dev` saiu do ar, 388 fotos
+     * do catalogo passaram a devolver erro 500 em producao. As fotografias
+     * foram trazidas para `/public/fotos` em WebP (`audit/migrar-imagens.mjs`)
+     * e a lista fica vazia de proposito: servidor de terceiro nao volta a ser
+     * dependencia do site sem uma decisao explicita.
+     */
+    remotePatterns: [],
     formats: ['image/avif', 'image/webp'],
   },
 
@@ -46,11 +50,46 @@ const nextConfig: NextConfig = {
     ]
 
     /*
+     * Política de conteúdo do SITE PÚBLICO.
+     *
+     * Antes só o painel tinha CSP, sob o argumento de que uma política
+     * restritiva quebraria o `next/image` e as fontes do Google. Medido no ar:
+     * as fontes são servidas de `/_next/static/media` (next/font as embute no
+     * próprio domínio) e o CSS também é local — nada vem do Google. As únicas
+     * origens externas no HTML são imagens do WordPress antigo e links de
+     * saída (wa.me, redes sociais), que `img-src` e a ausência de restrição a
+     * navegação já cobrem.
+     *
+     * Sem CSP, um XSS que escapasse do React teria liberdade total para
+     * exfiltrar dados de formulário. Com ela, `connect-src 'self'` barra o
+     * envio para fora e `form-action 'self'` impede o sequestro do destino.
+     *
+     * `'unsafe-inline'` em script-src é necessário pelo mesmo motivo do
+     * painel: o Next injeta hidratação em `<script>` inline sem nonce estável.
+     */
+    const cspPublico = [
+      "default-src 'self'",
+      "script-src 'self' 'unsafe-inline'",
+      "style-src 'self' 'unsafe-inline'",
+      /* Só o próprio domínio: as fotos agora moram em `/public/fotos`.
+         `data:`/`blob:` seguem porque o next/image os usa no placeholder. */
+      "img-src 'self' data: blob:",
+      "media-src 'self'",
+      "font-src 'self' data:",
+      "connect-src 'self'",
+      "form-action 'self'",
+      /* O site não deve ser emoldurado por ninguém — mesma intenção do
+         X-Frame-Options, na versão que os navegadores modernos respeitam. */
+      "frame-ancestors 'none'",
+      "base-uri 'self'",
+      "object-src 'none'",
+      "upgrade-insecure-requests",
+    ].join('; ')
+
+    /*
      * Política de conteúdo do painel.
      *
-     * Vale só em `/admin`: é onde estão os dados sensíveis, e onde uma
-     * segunda barreira compensa. No site público uma política restritiva
-     * quebraria o `next/image` e as fontes do Google sem ganho equivalente.
+     * Mais fechada que a do site público: aqui estão os dados sensíveis.
      *
      * `'unsafe-inline'` em script-src é necessário porque o Next injeta os
      * dados de hidratação em `<script>` inline sem nonce estável. Não torna a
@@ -65,8 +104,8 @@ const nextConfig: NextConfig = {
       "default-src 'self'",
       "script-src 'self' 'unsafe-inline'",
       "style-src 'self' 'unsafe-inline'",
-      // As fotos vêm dos hosts da allowlist do next/image.
-      "img-src 'self' data: blob: https://lanchascoral.com.br https://broker.lanchascoral.com.br https://mariath.dev",
+      // As fotos sao locais desde a migracao para `/public/fotos`.
+      "img-src 'self' data: blob:",
       "font-src 'self' data:",
       "connect-src 'self'",
       "form-action 'self'",
@@ -76,7 +115,7 @@ const nextConfig: NextConfig = {
     ].join('; ')
 
     return [
-      { source: '/:path*', headers: base },
+      { source: '/:path*', headers: [...base, { key: 'Content-Security-Policy', value: cspPublico }] },
       {
         source: '/admin/:path*',
         headers: [

@@ -4,6 +4,7 @@ import { useEffect, useId, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import type { ReactNode } from 'react'
 import ContactForm from '@/components/ContactForm'
+import { IconButton } from '@/components/ui'
 import { getDict } from '@/i18n/dictionary'
 import type { Locale } from '@/i18n/config'
 
@@ -139,16 +140,15 @@ export default function QuoteDialog({
                   </h2>
                 </div>
 
-                <button
-                  type="button"
+                <IconButton
+                  rotulo={t.boat.close}
                   onClick={() => setOpen(false)}
-                  aria-label={t.boat.close}
-                  className="-mr-2 -mt-1 shrink-0 rounded-[var(--radius-pill)] p-2 text-[var(--text-muted)] transition-colors hover:bg-[var(--surface-sunken)] hover:text-[var(--text-strong)]"
+                  className="-mr-2 -mt-1"
                 >
                   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" aria-hidden>
                     <path d="M6 6l12 12M18 6L6 18" />
                   </svg>
-                </button>
+                </IconButton>
               </div>
 
               <div className="px-7 pb-9 pt-7 sm:px-9">

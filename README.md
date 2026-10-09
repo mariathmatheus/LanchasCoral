@@ -255,6 +255,7 @@ failed, as they should have.
 | `npm run test:e2e` | the full battery of 249 cases against the site |
 | `node audit/lh.mjs <url>` | Lighthouse across every page |
 | `node audit/_varredura.mjs` | phone layout, 20 routes at 3 widths |
+| `node --env-file=.env audit/migrar-imagens.mjs` | pulls external photos into `/public/fotos` as WebP (`--simular` only reports) |
 | `node infra/backup.mjs` | database copy, with verification |
 | `node infra/backup.mjs --listar` | existing copies |
 | `node infra/videos-do-drive.mjs` | pulls and compresses videos from Drive |

@@ -1,6 +1,7 @@
 'use client'
 
 import CompararAqui from './CompararAqui'
+import { IconButton } from '@/components/ui'
 import { getDict } from '@/i18n/dictionary'
 import type { Locale } from '@/i18n/config'
 
@@ -50,7 +51,7 @@ export default function BotaoComparar({
               aria-expanded={aberto}
               aria-haspopup="listbox"
               aria-label={rotulo}
-              className={`inline-flex min-h-12 items-center gap-2.5 rounded-[var(--radius-pill)] border px-5 font-body text-xs font-bold uppercase tracking-[var(--tracking-wide)] transition-[background-color,border-color,color] duration-[240ms] ${
+              className={`btn-press inline-flex min-h-12 items-center gap-2.5 rounded-[var(--radius-pill)] border px-5 font-body text-xs font-bold uppercase tracking-[var(--tracking-wide)] transition-[background-color,border-color,color] duration-[240ms] ${
                 aberto
                   ? 'border-aqua-500 bg-aqua-500/15 text-aqua-400'
                   : 'border-pearl-0/30 text-pearl-0 hover:border-pearl-0/60 hover:bg-pearl-0/10'
@@ -63,24 +64,21 @@ export default function BotaoComparar({
         }
 
         return (
-          <button
-            type="button"
+          <IconButton
+            rotulo={rotulo}
+            tone="overlay"
             onClick={aoClicar}
             aria-expanded={aberto}
             aria-haspopup="listbox"
-            aria-label={rotulo}
             title={rotulo}
-            /* `min-h-11`/`min-w-11`: alvo de toque de 44px, o mínimo que a
-               regra de acessibilidade pede. O quadrado visível é menor; a
-               folga é padding. */
-            className={`absolute right-2.5 top-2.5 z-10 inline-flex min-h-11 min-w-11 items-center justify-center rounded-[var(--radius-pill)] backdrop-blur-sm transition-[background-color,color] duration-[240ms] ${
-              aberto
-                ? 'bg-aqua-500 text-navy-900'
-                : 'bg-navy-900/45 text-pearl-0 hover:bg-navy-900/70'
+            /* Marcado, troca para o aqua solido: o estado precisa ler sobre a
+               foto, onde uma mudanca so de opacidade some. */
+            className={`absolute right-2.5 top-2.5 z-10 ${
+              aberto ? '!bg-aqua-500 !text-navy-900' : ''
             }`}
           >
             <Icone marcado={aberto} />
-          </button>
+          </IconButton>
         )
       }}
     </CompararAqui>

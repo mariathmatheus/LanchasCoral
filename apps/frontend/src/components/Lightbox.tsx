@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import Image from 'next/image'
+import { IconButton } from '@/components/ui'
 import { getDict } from '@/i18n/dictionary'
 import type { Locale } from '@/i18n/config'
 
@@ -167,31 +168,39 @@ export default function Lightbox({
         </span>
 
         <div className="flex items-center gap-1">
-          <BotaoIcone
+          <IconButton
+            tone="dark"
             rotulo={t.zoomOut}
-            desabilitado={zoom <= 1}
-            aoClicar={() => setZoom((z) => Math.max(1, z - 0.5))}
+            disabled={zoom <= 1}
+            onClick={() => setZoom((z) => Math.max(1, z - 0.5))}
           >
-            <path d="M5 12h14" />
-          </BotaoIcone>
-          <button
-            type="button"
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" aria-hidden>
+              <path d="M5 12h14" />
+            </svg>
+          </IconButton>
+          <IconButton
+            tone="dark"
+            rotulo={t.zoomReset}
             onClick={() => { setZoom(1); setPan({ x: 0, y: 0 }) }}
-            aria-label={t.zoomReset}
-            className="min-w-14 rounded-[var(--radius-pill)] px-2 py-2 font-mono text-xs tabular-nums text-white/70 transition-colors hover:bg-white/10 hover:text-white"
+            className="min-w-14 px-2 font-mono text-xs tabular-nums"
           >
             {Math.round(zoom * 100)}%
-          </button>
-          <BotaoIcone
+          </IconButton>
+          <IconButton
+            tone="dark"
             rotulo={t.zoomIn}
-            desabilitado={zoom >= ZOOM_MAX}
-            aoClicar={() => setZoom((z) => Math.min(ZOOM_MAX, z + 0.5))}
+            disabled={zoom >= ZOOM_MAX}
+            onClick={() => setZoom((z) => Math.min(ZOOM_MAX, z + 0.5))}
           >
-            <path d="M12 5v14M5 12h14" />
-          </BotaoIcone>
-          <BotaoIcone rotulo={t.close} aoClicar={aoFechar}>
-            <path d="M6 6l12 12M18 6L6 18" />
-          </BotaoIcone>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" aria-hidden>
+              <path d="M12 5v14M5 12h14" />
+            </svg>
+          </IconButton>
+          <IconButton tone="dark" rotulo={t.close} onClick={aoFechar}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" aria-hidden>
+              <path d="M6 6l12 12M18 6L6 18" />
+            </svg>
+          </IconButton>
         </div>
       </div>
 
@@ -298,32 +307,6 @@ export default function Lightbox({
   return createPortal(corpo, document.body)
 }
 
-function BotaoIcone({
-  children,
-  rotulo,
-  aoClicar,
-  desabilitado,
-}: {
-  children: React.ReactNode
-  rotulo: string
-  aoClicar: () => void
-  desabilitado?: boolean
-}) {
-  return (
-    <button
-      type="button"
-      onClick={aoClicar}
-      disabled={desabilitado}
-      aria-label={rotulo}
-      className="rounded-[var(--radius-pill)] p-2.5 text-white/70 transition-colors hover:bg-white/10 hover:text-white disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:bg-transparent"
-    >
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
-        {children}
-      </svg>
-    </button>
-  )
-}
-
 function Seta({
   lado,
   rotulo,
@@ -334,17 +317,19 @@ function Seta({
   aoClicar: () => void
 }) {
   return (
-    <button
-      type="button"
+    <IconButton
+      rotulo={rotulo}
+      tone="overlay"
       onClick={(e) => { e.stopPropagation(); aoClicar() }}
-      aria-label={rotulo}
-      className={`absolute top-1/2 hidden -translate-y-1/2 rounded-full bg-navy-900/50 p-3 text-white/70 transition-all duration-200 hover:bg-navy-900/80 hover:text-white sm:block ${
+      /* `hidden sm:inline-flex`: no celular quem troca de foto e o gesto de
+         arrastar, e as setas cobririam a propria fotografia. */
+      className={`absolute top-1/2 hidden h-12 w-12 -translate-y-1/2 sm:inline-flex ${
         lado === 'esquerda' ? 'left-4' : 'right-4'
       }`}
     >
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
         <path d={lado === 'direita' ? 'M9 6l6 6-6 6' : 'M15 6l-6 6 6 6'} />
       </svg>
-    </button>
+    </IconButton>
   )
 }

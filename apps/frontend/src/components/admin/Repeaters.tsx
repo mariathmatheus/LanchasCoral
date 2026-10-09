@@ -8,7 +8,7 @@ const inputCls =
 
 /** Botão "Adicionar" dos repetidores. */
 const addBtnCls =
-  'shrink-0 rounded-[var(--radius-pill)] bg-[image:var(--grad-signature)] px-4 py-2 text-sm font-semibold text-pearl-0 shadow-[var(--shadow-sm)] transition-[box-shadow] duration-[240ms] hover:shadow-[var(--glow-signature)]'
+  'btn-press shrink-0 rounded-[var(--radius-pill)] bg-ocean-600 px-4 py-2 text-sm font-semibold text-pearl-0 shadow-[var(--shadow-sm)] hover:bg-ocean-500 active:bg-ocean-700'
 
 /** Botão de ícone (mover / remover). */
 const iconBtnCls =
@@ -68,7 +68,11 @@ export function ImagesField({ name, initial }: { name: string; initial: ImageRow
     setBulk(recusadas.join(' '))
     setAviso(
       recusadas.length
-        ? `${recusadas.length === 1 ? 'Um endereço não foi aceito' : `${recusadas.length} endereços não foram aceitos`}: as fotos precisam começar com https:// e vir de ${HOSTS_DE_IMAGEM.join(', ')}.`
+        ? `${recusadas.length === 1 ? 'Um endereço não foi aceito' : `${recusadas.length} endereços não foram aceitos`}: ${
+            HOSTS_DE_IMAGEM.length
+              ? `as fotos precisam começar com https:// e vir de ${HOSTS_DE_IMAGEM.join(', ')}.`
+              : 'as fotos precisam estar no próprio site, em /public/fotos — o endereço começa com /fotos/. Fotos de outros servidores somem quando aquele servidor sai do ar.'
+          }`
         : '',
     )
   }
@@ -335,7 +339,7 @@ export function PerformanceField({ name, initial }: { name: string; initial: Per
       <button
         type="button"
         onClick={() => setRows([...rows, { label: '', fuel: null, cruiseLh: null, avgLh: null }])}
-        className="mt-3 rounded-[var(--radius-pill)] border border-[var(--border-strong)] px-4 py-2 text-sm font-semibold text-[var(--text-strong)] transition-colors duration-[140ms] hover:border-ocean-700 hover:bg-[var(--surface-sunken)]"
+        className="btn-press mt-3 rounded-[var(--radius-pill)] border border-[var(--border-strong)] px-4 py-2 text-sm font-semibold text-[var(--text-strong)] transition-colors duration-[140ms] hover:border-ocean-700 hover:bg-[var(--surface-sunken)]"
       >
         + Adicionar motorização
       </button>

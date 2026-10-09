@@ -297,6 +297,29 @@ const DICT = {
       empty: 'Nenhum artigo publicado.',
       publishedOn: 'Publicado em',
     },
+    compartilhar: {
+      label: 'Compartilhe',
+      copy: 'Copiar link',
+      copied: 'Link copiado',
+      whatsapp: 'WhatsApp',
+      email: 'E-mail',
+      close: 'Fechar',
+    },
+    consultor: {
+      title: 'Fale com um consultor',
+      role: 'Comercial Lanchas Coral',
+      phone: 'Telefone',
+      email: 'E-mail',
+      whatsapp: 'Chamar no WhatsApp',
+    },
+    zap: {
+      label: 'Falar no WhatsApp',
+      /* Primeira mensagem já enviada pela pessoa. Sem ela o consultor recebe
+         um "oi" solto e precisa perguntar de onde veio o contato. */
+      message: 'Olá! Vim pelo site da Lanchas Coral e gostaria de mais informações.',
+      messageBoat: (modelo: string) =>
+        `Olá! Vim pelo site da Lanchas Coral e tenho interesse na ${modelo}.`,
+    },
     lang: { switch: 'Mudar idioma' },
   },
 
@@ -589,6 +612,27 @@ const DICT = {
       backToIndex: 'All tips',
       empty: 'No articles published.',
       publishedOn: 'Published on',
+    },
+    compartilhar: {
+      label: 'Share',
+      copy: 'Copy link',
+      copied: 'Link copied',
+      whatsapp: 'WhatsApp',
+      email: 'Email',
+      close: 'Close',
+    },
+    consultor: {
+      title: 'Talk to a broker',
+      role: 'Lanchas Coral sales desk',
+      phone: 'Phone',
+      email: 'Email',
+      whatsapp: 'Message on WhatsApp',
+    },
+    zap: {
+      label: 'Chat on WhatsApp',
+      message: 'Hello! I came from the Lanchas Coral website and would like more information.',
+      messageBoat: (modelo: string) =>
+        `Hello! I came from the Lanchas Coral website and I'm interested in the ${modelo}.`,
     },
     lang: { switch: 'Change language' },
   },

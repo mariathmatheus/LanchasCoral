@@ -9,6 +9,7 @@ import { meters, litres, kilos, hp, people, num } from '@/lib/format'
 import Gallery from '@/components/Gallery'
 import EquipmentPanels from '@/components/EquipmentPanels'
 import SiteHeader from '@/components/SiteHeader'
+import ShareButton from '@/components/ShareButton'
 import QuoteDialog from '@/components/QuoteDialog'
 import BotaoComparar from '@/components/comparador/BotaoComparar'
 import BoatCard from '@/components/BoatCard'
@@ -105,7 +106,7 @@ export default async function BoatView({ slug, locale }: { slug: string; locale:
           <nav aria-label={t.breadcrumbAria} className="font-mono text-xs text-on-dark-muted">
             <ol className="flex items-center gap-2">
               <li>
-                <Link href={href('modelos', locale)} className="inline-flex min-h-8 items-center transition-colors hover:text-pearl-0">
+                <Link href={href('modelos', locale)} className="inline-flex min-h-11 items-center transition-colors hover:text-pearl-0">
                   {t.breadcrumb}
                 </Link>
               </li>
@@ -118,19 +119,21 @@ export default async function BoatView({ slug, locale }: { slug: string; locale:
             </ol>
           </nav>
 
-          <div className="mt-6 flex flex-wrap items-end justify-between gap-8">
-            <div>
+          {/* Mesma regra do anuncio do Broker: o titulo quebra dentro da
+              propria coluna em vez de empurrar os botoes de lugar. */}
+          <div className="mt-6 flex flex-wrap items-end justify-between gap-x-8 gap-y-6">
+            <div className="min-w-0 flex-1 basis-[280px]">
               {boat.variant && (
                 <Badge tone={/blackline/i.test(boat.variant) ? 'lime' : 'outline-inverse'}>
                   {boat.variant}
                 </Badge>
               )}
-              <h1 className="mt-4 font-display text-[length:var(--text-d1)] font-medium leading-[1.02] tracking-[var(--tracking-hero)] text-pearl-0">
+              <h1 className="mt-4 text-balance font-display text-[length:var(--text-d1)] font-medium leading-[1.02] tracking-[var(--tracking-hero)] text-pearl-0">
                 {boat.name}
               </h1>
             </div>
 
-            <div className="flex flex-wrap gap-3">
+            <div className="flex shrink-0 flex-wrap gap-3">
               <Button href="#ficha-tecnica" variant="outline-inverse" size="md">
                 {t.specsCta}
               </Button>
@@ -142,7 +145,7 @@ export default async function BoatView({ slug, locale }: { slug: string; locale:
                   download
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex min-h-11 items-center gap-2 whitespace-nowrap rounded-[var(--radius-pill)] border border-[var(--border-on-dark-strong)] px-5 font-body text-xs font-bold uppercase tracking-[var(--tracking-wide)] text-pearl-0 transition-colors duration-[140ms] hover:border-aqua-500 hover:text-aqua-500"
+                  className="btn-press inline-flex min-h-11 items-center gap-2 whitespace-nowrap rounded-[var(--radius-pill)] border border-[var(--border-on-dark-strong)] px-5 font-body text-xs font-bold uppercase tracking-[var(--tracking-wide)] text-pearl-0 hover:border-aqua-500 hover:text-aqua-500"
                 >
                   <IconDownload size={15} />
                   {t.manualCta}
@@ -218,13 +221,19 @@ export default async function BoatView({ slug, locale }: { slug: string; locale:
               <SpecTable rows={engineAndTanks} className="[&>*:last-child]:border-b-0" />
             </div>
           </div>
+
+          {/* Compartilhar fecha a ficha: e aqui, com as medidas na tela, que
+              alguem manda o barco para quem vai decidir junto. */}
+          <ShareButton locale={locale} titulo={label} className="mt-8" />
         </div>
       </section>
 
       {/* ================= PERFORMANCE ================= */}
+      {/* `py-16` em vez de `py-20 lg:py-28`: com uma unica motorizacao a
+          secao tinha mais respiro do que conteudo. */}
       {perf.length > 0 && (
         <section
-          className="relative isolate overflow-hidden py-20 lg:py-28"
+          className="relative isolate overflow-hidden py-16 lg:py-20"
           style={{ background: 'var(--grad-technical)' }}
         >
           <WakeLines side="left" tone="dark" className="top-1/2 -translate-y-1/2" />
@@ -233,7 +242,20 @@ export default async function BoatView({ slug, locale }: { slug: string; locale:
               <SectionHeading inverse eyebrow={t.perfEyebrow} title={t.perfTitle} />
             </Reveal>
 
-            <div className="mt-14 grid grid-cols-1 gap-6 lg:mt-16 lg:grid-cols-2">
+            {/*
+              A grade acompanha quantas motorizacoes existem.
+
+              Fixa em duas colunas, o modelo com uma so opcao deixava metade
+              da dobra vazia: o cartao encolhido a esquerda e um buraco do
+              mesmo tamanho a direita. Com uma motorizacao o cartao passa a
+              ocupar a largura inteira (e os numeros se espalham por ela, ver
+              `lg:grid-cols-4` abaixo); a partir de duas, volta a ser grade.
+            */}
+            <div
+              className={`mt-12 grid grid-cols-1 gap-6 ${
+                perf.length > 1 ? 'lg:grid-cols-2' : ''
+              }`}
+            >
               {perf.map((p, i) => (
                 <div
                   key={i}
@@ -249,7 +271,13 @@ export default async function BoatView({ slug, locale }: { slug: string; locale:
                     )}
                   </div>
 
-                  <div className="mt-8 grid grid-cols-2 gap-6 border-t border-[var(--border-on-dark)] pt-6">
+                  {/* Cartao unico e largo: os numeros se distribuem em quatro
+                      colunas para nao ficarem amontoados num canto so. */}
+                  <div
+                    className={`mt-8 grid grid-cols-2 gap-6 border-t border-[var(--border-on-dark)] pt-6 ${
+                      perf.length === 1 ? 'lg:grid-cols-4' : ''
+                    }`}
+                  >
                     <StatBlock inverse value={p.cruiseLh ?? '—'} unit="L/h" label={t.cruise} />
                     <StatBlock inverse value={p.avgLh ?? '—'} unit="L/h" label={t.average} />
                   </div>

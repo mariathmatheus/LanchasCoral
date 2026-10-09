@@ -186,7 +186,7 @@ export default function TrocarModelo({
         onClick={() => (aberto ? setAberto(false) : abrir())}
         aria-expanded={aberto}
         aria-haspopup="listbox"
-        className="inline-flex min-h-9 items-center gap-1.5 rounded-[var(--radius-pill)] border border-[var(--border-subtle)] px-3 py-1 text-xs font-medium text-[var(--color-text-body)] transition-colors duration-[140ms] hover:border-ocean-700 hover:text-ocean-700"
+        className="btn-press inline-flex min-h-11 items-center gap-1.5 rounded-[var(--radius-pill)] border border-[var(--border-subtle)] px-3 py-2 text-xs font-medium text-[var(--color-text-body)] transition-colors duration-[140ms] hover:border-ocean-700 hover:text-ocean-700"
       >
         {t.swapModel}
         <svg

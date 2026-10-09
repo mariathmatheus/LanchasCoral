@@ -51,7 +51,7 @@ export default async function DicaView({ slug, locale = 'pt' }: { slug: string; 
                 <li>
                   <Link
                     href={href('dicas', locale)}
-                    className="inline-flex min-h-8 items-center transition-colors hover:text-pearl-0"
+                    className="inline-flex min-h-11 items-center transition-colors hover:text-pearl-0"
                   >
                     {c.title}
                   </Link>

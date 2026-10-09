@@ -102,7 +102,7 @@ export default function ModoDeEnvio({
             type="button"
             onClick={() => setConfirmando(true)}
             disabled={!podeAtivar}
-            className="inline-flex min-h-11 items-center rounded-[var(--radius-pill)] border border-[var(--border-strong)] px-4 py-2 text-sm font-medium text-[var(--color-text-body)] transition-colors duration-[140ms] hover:bg-[var(--surface-sunken)] disabled:cursor-not-allowed disabled:opacity-40"
+            className="btn-press inline-flex min-h-11 items-center rounded-[var(--radius-pill)] border border-[var(--border-strong)] px-4 py-2 text-sm font-medium text-[var(--color-text-body)] transition-colors duration-[140ms] hover:bg-[var(--surface-sunken)] disabled:cursor-not-allowed disabled:opacity-40"
           >
             Ligar envio automático
           </button>
@@ -118,7 +118,7 @@ function Botao({ rotulo, destaque }: { rotulo: string; destaque?: boolean }) {
     <button
       type="submit"
       disabled={pending}
-      className={`inline-flex min-h-11 items-center rounded-[var(--radius-pill)] px-4 py-2 text-sm font-semibold transition-colors duration-[140ms] disabled:opacity-50 ${
+      className={`btn-press inline-flex min-h-11 items-center rounded-[var(--radius-pill)] px-4 py-2 text-sm font-semibold transition-colors duration-[140ms] disabled:opacity-50 ${
         destaque
           ? 'bg-warning-500 text-navy-900 hover:opacity-90'
           : 'border border-[var(--border-strong)] font-medium text-[var(--color-text-body)] hover:bg-[var(--surface-sunken)]'

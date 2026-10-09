@@ -1,3 +1,4 @@
+import { SubmitButton } from '@/components/ui'
 import { href, type Locale } from '@/i18n/config'
   import { getDict } from '@/i18n/dictionary'
 
@@ -128,19 +129,16 @@ import { href, type Locale } from '@/i18n/config'
         ))}
 
         <div className="flex gap-2">
-          <button
-            type="submit"
-            className="h-11 flex-1 rounded-[var(--radius-pill)] bg-[image:var(--grad-signature)] px-5 font-body text-xs font-semibold uppercase tracking-[0.06em] text-pearl-0 shadow-[var(--shadow-sm)] transition-all duration-[240ms] ease-[var(--ease-glide)] hover:-translate-y-0.5 hover:shadow-[var(--glow-signature)]"
-          >
+          <SubmitButton size="sm" className="h-11 flex-1">
             {t.apply}
-          </button>
+          </SubmitButton>
 
           {temFiltro && (
             <a
               href={href('broker', locale)}
               title={t.clear}
               aria-label={t.clear}
-              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[var(--radius-pill)] border border-[var(--border-subtle)] text-[var(--text-muted)] transition-colors hover:border-ocean-700 hover:text-ocean-700"
+              className="btn-press flex h-11 w-11 shrink-0 items-center justify-center rounded-[var(--radius-pill)] border border-[var(--border-subtle)] text-[var(--text-muted)] hover:border-ocean-700 hover:text-ocean-700"
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" aria-hidden>
                 <path d="M6 6l12 12M18 6L6 18" />

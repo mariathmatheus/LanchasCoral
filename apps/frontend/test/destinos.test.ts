@@ -23,8 +23,14 @@ describe('destinoDe', () => {
     expect(destinoDe('TRABALHE')).toBe(CAIXAS.dp)
   })
 
-  it('manda fornecedor para compras', () => {
-    expect(destinoDe('ANUNCIAR')).toBe(CAIXAS.compras)
+  it('manda quem quer anunciar a lancha para o comercial', () => {
+    /* `ANUNCIAR` vem de /venda-sua-lancha — "Venda sua lancha conosco", a
+       intermediacao do Broker. Ja foi para `compras@`, que o site descreve
+       como "fornecimento de pecas, insumos e parcerias": quem le aquela caixa
+       nao intermedia venda de seminovo. */
+    expect(destinoDe('ANUNCIAR')).toBe(CAIXAS.comercial)
+    expect(destinoDe('BROKER')).toBe(CAIXAS.comercial)
+    expect(destinoDe('VISITA')).toBe(CAIXAS.comercial)
   })
 
   it('aceita o tipo em qualquer caixa', () => {

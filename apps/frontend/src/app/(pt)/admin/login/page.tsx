@@ -57,7 +57,7 @@ export default function LoginPage() {
 
             <button
               type="submit" disabled={pending}
-              className="w-full rounded-[var(--radius-pill)] bg-[image:var(--grad-signature)] px-4 py-3 text-sm font-semibold text-pearl-0 shadow-[var(--shadow-sm)] transition-[box-shadow,opacity] duration-[240ms] ease-[var(--ease-glide)] hover:shadow-[var(--glow-signature)] disabled:cursor-not-allowed disabled:opacity-60"
+              className="btn-press w-full rounded-[var(--radius-pill)] bg-ocean-600 px-4 py-3 text-sm font-semibold text-pearl-0 shadow-[var(--shadow-sm)] hover:bg-ocean-500 active:bg-ocean-700 disabled:opacity-60"
             >
               {pending ? 'Entrando…' : 'Entrar'}
             </button>

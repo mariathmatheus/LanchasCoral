@@ -7,15 +7,15 @@ import Link from 'next/link'
 
 /** Botão de ação primária — gradiente de assinatura, texto pearl-0. */
 export const primaryBtnCls =
-  'inline-flex shrink-0 items-center justify-center gap-2 rounded-[var(--radius-pill)] bg-[image:var(--grad-signature)] px-5 py-2.5 text-sm font-semibold text-pearl-0 shadow-[var(--shadow-sm)] transition-[box-shadow,transform] duration-[240ms] ease-[var(--ease-glide)] hover:-translate-y-0.5 hover:shadow-[var(--glow-signature)] disabled:cursor-not-allowed disabled:opacity-60'
+  'btn-press inline-flex shrink-0 items-center justify-center gap-2 rounded-[var(--radius-pill)] bg-ocean-600 px-5 py-2.5 text-sm font-semibold text-pearl-0 shadow-[var(--shadow-sm)] hover:bg-ocean-500 active:bg-ocean-700 disabled:opacity-60'
 
 /** Ação secundária / neutra. */
 export const secondaryBtnCls =
-  'inline-flex shrink-0 items-center justify-center gap-2 rounded-[var(--radius-pill)] border border-[var(--border-strong)] bg-[var(--surface-card)] px-5 py-2.5 text-sm font-semibold text-[var(--text-strong)] transition-colors duration-[140ms] hover:border-ocean-700 hover:bg-[var(--surface-sunken)]'
+  'btn-press inline-flex shrink-0 items-center justify-center gap-2 rounded-[var(--radius-pill)] border border-[var(--border-strong)] bg-[var(--surface-card)] px-5 py-2.5 text-sm font-semibold text-[var(--text-strong)] hover:border-ocean-700 hover:bg-[var(--surface-sunken)]'
 
 /** Ação destrutiva, discreta até o hover. */
 export const dangerBtnCls =
-  'inline-flex shrink-0 items-center justify-center rounded-[var(--radius-pill)] border border-[var(--border-subtle)] px-4 py-2 text-sm font-medium text-danger-500 transition-colors duration-[140ms] hover:border-danger-500 hover:bg-danger-500/8'
+  'btn-press inline-flex shrink-0 items-center justify-center rounded-[var(--radius-pill)] border border-[var(--border-subtle)] px-4 py-2 text-sm font-medium text-danger-500 hover:border-danger-500 hover:bg-danger-500/8'
 
 /**
  * Cabeçalho de tela: título, contagem de itens e a ação primária sempre visível.

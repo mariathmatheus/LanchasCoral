@@ -15,9 +15,12 @@ type Family = { id: string; name: string; boats: Boat[] }
 export default function MobileNav({
   families,
   locale = 'pt',
+  ocultarCta = false,
 }: {
   families: Family[]
   locale?: Locale
+  /** No Broker o CTA de proposta some, como no cabecalho em telas grandes. */
+  ocultarCta?: boolean
 }) {
   const [open, setOpen] = useState(false)
   const [montado, setMontado] = useState(false)
@@ -132,7 +135,7 @@ export default function MobileNav({
                             key={b.slug}
                             href={href('modelos', locale, `/${b.slug}`)}
                             onClick={close}
-                            className="font-display text-xl font-semibold tracking-[var(--tracking-display)] text-pearl-0"
+                            className="flex min-h-11 items-center font-display text-xl font-semibold tracking-[var(--tracking-display)] text-pearl-0"
                           >
                             {single ? b.name : (b.variant ?? b.name)}
                           </Link>
@@ -153,7 +156,7 @@ export default function MobileNav({
                     key={l.key}
                     href={href(l.key, locale)}
                     onClick={close}
-                    className="font-display text-lg font-medium tracking-[var(--tracking-display)] text-pearl-0"
+                    className="flex min-h-11 items-center font-display text-lg font-medium tracking-[var(--tracking-display)] text-pearl-0"
                   >
                     {l.label}
                   </Link>
@@ -167,7 +170,7 @@ export default function MobileNav({
                     key={l.key}
                     href={href(l.key, locale)}
                     onClick={close}
-                    className="font-display text-xl font-semibold tracking-[var(--tracking-display)] text-pearl-0"
+                    className="flex min-h-11 items-center font-display text-xl font-semibold tracking-[var(--tracking-display)] text-pearl-0"
                   >
                     {l.label}
                   </Link>
@@ -184,7 +187,7 @@ export default function MobileNav({
                     key={l.key}
                     href={href(l.key, locale)}
                     onClick={close}
-                    className="font-display text-lg font-medium tracking-[var(--tracking-display)] text-pearl-0"
+                    className="flex min-h-11 items-center font-display text-lg font-medium tracking-[var(--tracking-display)] text-pearl-0"
                   >
                     {l.label}
                   </Link>
@@ -193,13 +196,15 @@ export default function MobileNav({
 
               {/* Nao fecha o menu aqui: isso desmontaria o pop-up junto.
                   O diálogo cobre a tela inteira por cima do painel. */}
-              <div className="mt-8">
-                <QuoteDialog locale={locale}>
-                  <Button href="#" variant="signature" size="lg" fullWidth>
-                    {t.nav.quote}
-                  </Button>
-                </QuoteDialog>
-              </div>
+              {!ocultarCta && (
+                <div className="mt-8">
+                  <QuoteDialog locale={locale}>
+                    <Button href="#" variant="signature" size="lg" fullWidth>
+                      {t.nav.quote}
+                    </Button>
+                  </QuoteDialog>
+                </div>
+              )}
             </div>
           </div>,
           document.body,

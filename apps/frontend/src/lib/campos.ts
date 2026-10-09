@@ -101,12 +101,17 @@ export function textoOpcional(max = 2000) {
  * endereço passa pela validação de URL, é salva no banco, e só falha na hora
  * de renderizar: o otimizador responde 400 e o card do barco aparece
  * quebrado no site público, sem nada no painel que indique o motivo.
+ *
+ * A lista está VAZIA desde a migração das fotografias para `/public/fotos`:
+ * `remotePatterns` em `next.config.ts` também não tem nenhuma entrada, e as
+ * duas precisam concordar. Foi o desencontro entre elas que deixou 388 fotos
+ * quebradas quando `mariath.dev` saiu do ar — o painel aceitava o endereço e
+ * o site não conseguia exibi-lo.
+ *
+ * Com a lista vazia, o painel só aceita caminhos que começam com `/`, ou
+ * seja, arquivos servidos pelo próprio site.
  */
-export const HOSTS_DE_IMAGEM = [
-  'lanchascoral.com.br',
-  'broker.lanchascoral.com.br',
-  'mariath.dev',
-] as const
+export const HOSTS_DE_IMAGEM: readonly string[] = []
 
 /**
  * URL de foto: precisa ser https e vir de um host que o site saiba exibir.
@@ -140,7 +145,11 @@ export function urlDeImagem() {
     if (!permitido) {
       ctx.addIssue({
         code: 'custom',
-        message: `Fotos só podem vir de: ${HOSTS_DE_IMAGEM.join(', ')}. Para usar outro site, é preciso liberá-lo antes.`,
+        /* Sem host liberado a frase "só podem vir de: ." sairia truncada, e
+           ainda mandaria a pessoa colar um endereço que o site não exibe. */
+        message: HOSTS_DE_IMAGEM.length
+          ? `Fotos só podem vir de: ${HOSTS_DE_IMAGEM.join(', ')}. Para usar outro site, é preciso liberá-lo antes.`
+          : 'A foto precisa estar no próprio site: o endereço começa com /fotos/. Hospedar em outro servidor faz a imagem sumir quando aquele servidor sai do ar.',
       })
     }
   })

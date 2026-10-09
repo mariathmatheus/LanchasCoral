@@ -93,7 +93,9 @@ export default function Carousel({
                 onClick={() => toPage(i)}
                 // O botao tem 44px de alvo com padding transparente; o traco
                 // visual continua com 6px. Sem isso o alvo real era 6x6px.
-                className="group flex h-11 items-center px-2"
+                // `min-w-11`: com `px-2` o ponto inativo (6px) dava 22px de
+                // largura — alto o bastante, mas estreito demais para o dedo.
+                className="group flex h-11 min-w-11 items-center justify-center px-2"
               >
                 <span
                   className={`block h-1.5 rounded-full transition-all duration-[240ms] ease-[var(--ease-glide)] ${

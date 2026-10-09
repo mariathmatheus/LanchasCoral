@@ -57,7 +57,7 @@ export default async function ContatosView({ locale = 'pt' }: { locale?: Locale 
                   <a
                     key={tel}
                     href={`tel:+55${soDigitos(tel)}`}
-                    className="inline-flex min-h-9 items-center font-mono text-[15px] text-ocean-700 underline-offset-4 hover:text-aqua-600 hover:underline"
+                    className="inline-flex min-h-11 items-center font-mono text-[15px] text-ocean-700 underline-offset-4 hover:text-aqua-600 hover:underline"
                   >
                     {tel}
                   </a>
@@ -67,7 +67,7 @@ export default async function ContatosView({ locale = 'pt' }: { locale?: Locale 
                     href={`https://wa.me/${area.whatsapp}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex min-h-9 items-center gap-1.5 text-sm font-semibold text-ocean-700 underline-offset-4 hover:text-aqua-600 hover:underline"
+                    className="inline-flex min-h-11 items-center gap-1.5 text-sm font-semibold text-ocean-700 underline-offset-4 hover:text-aqua-600 hover:underline"
                   >
                     {c.whatsapp}
                     <span aria-hidden>↗</span>

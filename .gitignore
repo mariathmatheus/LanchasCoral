@@ -31,6 +31,16 @@ infra/_videos-brutos/
 # Versionar binario de alguns MB por modelo incharia o repositorio.
 apps/frontend/public/videos/
 
+# Fotografias do catalogo, trazidas dos WordPress antigos por
+# `audit/migrar-imagens.mjs` e convertidas para WebP. Sao 627 arquivos / 126 MB
+# que pertencem a Coral, nao ao repositorio — e o conteudo ja vive no banco e
+# no volume do servidor. Quem subir do zero roda o migrador ou repoe pelo
+# painel, como ja vale para os videos do hero.
+apps/frontend/public/fotos/
+
+# Lista das imagens que a origem nao devolveu mais (relatorio do migrador).
+apps/frontend/audit/_imagens-perdidas.json
+
 # Captura do site antigo em WordPress, guardada como referência da migração.
 # 1,7 MB de HTML que não pertencem ao repositório publicado.
 Coral Website (offline).html

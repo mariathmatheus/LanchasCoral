@@ -3,14 +3,15 @@
 import { useCallback, useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import CabecalhoLado from './CabecalhoLado'
+import { IconButton } from '@/components/ui'
 import LinhasComparacao from './LinhasComparacao'
 import { type OpcaoModelo } from './TrocarModelo'
 import { getDict } from '@/i18n/dictionary'
-import { href as routeHref, type Locale } from '@/i18n/config'
+import { type Locale } from '@/i18n/config'
 import type { GrupoComparacao, Caracteristicas } from '@/lib/comparar'
 
 /**
- * Comparação em tela cheia, sobre a página atual.
+ * Comparação numa caixa sobreposta à página atual.
  *
  * Painel e não navegação: o visitante compara e volta exatamente para onde
  * estava. Mandar para outra rota perderia a lista que ele percorria e a
@@ -127,28 +128,38 @@ export default function PainelComparacao({
   }, [])
 
   const conteudo = (
+    /*
+      Sobreposicao e caixa, nao tela cheia.
+
+      O painel ocupava `inset-0` com fundo solido: cobria o site inteiro e
+      parecia outra pagina, quando e so uma consulta rapida sobre a pagina que
+      a pessoa ja estava lendo. Agora o fundo escurece e desfoca — o contexto
+      continua visivel atras — e a caixa cresce ate o conteudo, limitada a
+      altura da janela. Clicar fora fecha, como o X.
+    */
     <div
-      role="dialog"
-      aria-modal="true"
-      aria-label={t.panelAria}
-      className="fixed inset-0 z-[110] flex flex-col bg-[var(--surface-page)]"
+      className="fixed inset-0 z-[110] flex items-start justify-center overflow-y-auto bg-navy-900/70 p-4 backdrop-blur-sm sm:items-center sm:p-6"
+      onClick={aoFechar}
     >
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label={t.panelAria}
+        /* Para o clique dentro da caixa nao fechar o painel. */
+        onClick={(e) => e.stopPropagation()}
+        className="my-auto flex max-h-[calc(100vh-2rem)] w-full max-w-[920px] flex-col overflow-hidden rounded-[var(--radius-lg)] bg-[var(--surface-page)] shadow-[var(--shadow-lg)] sm:max-h-[calc(100vh-3rem)]"
+      >
       <div className="flex shrink-0 items-center justify-between gap-4 border-b border-[var(--border-subtle)] px-4 py-3 sm:px-6">
         <h1 className="font-display text-base font-semibold tracking-[var(--tracking-display)] text-[var(--text-strong)]">
           {t.barTitle}
         </h1>
 
         <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={aoFechar}
-            aria-label={t.close}
-            className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-[var(--radius-pill)] text-[var(--text-muted)] transition-colors duration-[140ms] hover:bg-[var(--surface-sunken)] hover:text-[var(--text-strong)]"
-          >
+          <IconButton rotulo={t.close} onClick={aoFechar}>
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" aria-hidden>
               <path d="M6 6l12 12M18 6L6 18" />
             </svg>
-          </button>
+          </IconButton>
         </div>
       </div>
 
@@ -161,7 +172,7 @@ export default function PainelComparacao({
           <div
             /* Esmaece durante a troca em vez de sumir: a tabela some por um
                instante e o painel saltaria de altura. */
-            className={`mx-auto w-full max-w-[var(--layout-narrow)] transition-opacity duration-200 ${
+            className={`mx-auto w-full transition-opacity duration-200 ${
               carregandoPar === chave ? 'opacity-50' : 'opacity-100'
             }`}
           >
@@ -191,16 +202,9 @@ export default function PainelComparacao({
               locale={locale}
             />
 
-            <p className="mt-8 text-center">
-              <a
-                href={`${routeHref('comparar', locale)}?a=${dados.a.slug}&b=${dados.b.slug}`}
-                className="text-xs font-medium text-ocean-700 underline-offset-4 transition-colors hover:text-aqua-600 hover:underline"
-              >
-                {t.shareTitle}
-              </a>
-            </p>
           </div>
         )}
+      </div>
       </div>
     </div>
   )
@@ -211,7 +215,7 @@ export default function PainelComparacao({
 /** Forma final antes dos dados, para o painel não saltar quando chegam. */
 function Esqueleto() {
   return (
-    <div className="mx-auto w-full max-w-[var(--layout-narrow)] animate-pulse">
+    <div className="mx-auto w-full animate-pulse">
       <div className="grid grid-cols-2 gap-3 sm:gap-6">
         {[0, 1].map((i) => (
           <div key={i}>

@@ -27,6 +27,9 @@ export default async function SiteHeader({
   const families = await getNavFamilies()
   const t = getDict(locale)
 
+  /* O CTA de proposta some no Broker — ver o comentario na marcacao abaixo. */
+  const ocultarCta = active === 'broker'
+
   const NAV = [
     { key: 'modelos' as const, label: t.nav.models },
     { key: 'sobre' as const, label: t.nav.institutional },
@@ -103,7 +106,7 @@ export default async function SiteHeader({
             <Link
               prefetch={false}
               href={href('modelos', locale)}
-              className={`flex items-center gap-1.5 border-b pb-[3px] font-body text-xs font-bold uppercase tracking-[var(--tracking-wide)] transition-colors ${
+              className={`flex items-center gap-1.5 nav-alvo border-b pb-[3px] font-body text-xs font-bold uppercase tracking-[var(--tracking-wide)] transition-colors ${
                 active === 'modelos'
                   ? 'border-aqua-500 text-pearl-0'
                   : 'border-transparent text-on-dark-muted hover:text-pearl-0'
@@ -159,7 +162,7 @@ export default async function SiteHeader({
             <Link
               prefetch={false}
               href={href('sobre', locale)}
-              className={`flex items-center gap-1.5 whitespace-nowrap border-b pb-[3px] font-body text-xs font-bold uppercase tracking-[var(--tracking-wide)] transition-colors ${
+              className={`flex items-center gap-1.5 whitespace-nowrap nav-alvo border-b pb-[3px] font-body text-xs font-bold uppercase tracking-[var(--tracking-wide)] transition-colors ${
                 active === 'sobre'
                   ? 'border-aqua-500 text-pearl-0'
                   : 'border-transparent text-on-dark-muted hover:text-pearl-0'
@@ -197,7 +200,7 @@ export default async function SiteHeader({
               prefetch={false}
               key={n.key}
               href={href(n.key, locale)}
-              className={`flex items-center whitespace-nowrap border-b pb-[3px] font-body text-xs font-bold uppercase tracking-[var(--tracking-wide)] transition-colors ${
+              className={`flex items-center whitespace-nowrap nav-alvo border-b pb-[3px] font-body text-xs font-bold uppercase tracking-[var(--tracking-wide)] transition-colors ${
                 active === n.key
                   ? 'border-aqua-500 text-pearl-0'
                   : 'border-transparent text-on-dark-muted hover:text-pearl-0'
@@ -211,7 +214,7 @@ export default async function SiteHeader({
             <Link
               prefetch={false}
               href={href('contatos', locale)}
-              className={`flex items-center gap-1.5 border-b pb-[3px] font-body text-xs font-bold uppercase tracking-[var(--tracking-wide)] transition-colors ${
+              className={`flex items-center gap-1.5 nav-alvo border-b pb-[3px] font-body text-xs font-bold uppercase tracking-[var(--tracking-wide)] transition-colors ${
                 active === 'contatos'
                   ? 'border-aqua-500 text-pearl-0'
                   : 'border-transparent text-on-dark-muted hover:text-pearl-0'
@@ -248,18 +251,25 @@ export default async function SiteHeader({
           {/* Abaixo de `md` o CTA aperta a linha; o menu mobile o carrega.
               Envolvido num span porque o `inline-flex` do proprio Button
               venceria um utilitario `hidden` no mesmo elemento. */}
-          {/* CTA de compra: abre o pop-up, nao leva para a pagina de contato. */}
-          <span className="hidden lg:block">
-            <QuoteDialog locale={locale}>
-              {/* `px-3` ate `xl` e rotulo sem quebra: no intervalo apertado
-                  (1024-1280px) o padding do tamanho `sm` e o que ainda da para
-                  ceder sem mexer no token compartilhado do botao. */}
-              <Button href="#" variant="signature" size="sm" className="whitespace-nowrap px-3 xl:px-5">
-                {t.nav.quote}
-              </Button>
-            </QuoteDialog>
-          </span>
-          <MobileNav families={families} locale={locale} />
+          {/* CTA de compra: abre o pop-up, nao leva para a pagina de contato.
+
+              No Broker ele nao aparece. Ali o assunto e um seminovo de
+              terceiro, e "Solicitar proposta" e o pedido de uma Coral NOVA:
+              o mesmo rotulo passaria a significar duas coisas na mesma tela,
+              concorrendo com o "Falar com consultor" do proprio anuncio. */}
+          {!ocultarCta && (
+            <span className="hidden lg:block">
+              <QuoteDialog locale={locale}>
+                {/* `px-3` ate `xl` e rotulo sem quebra: no intervalo apertado
+                    (1024-1280px) o padding do tamanho `sm` e o que ainda da para
+                    ceder sem mexer no token compartilhado do botao. */}
+                <Button href="#" variant="signature" size="sm" className="whitespace-nowrap px-3 xl:px-5">
+                  {t.nav.quote}
+                </Button>
+              </QuoteDialog>
+            </span>
+          )}
+          <MobileNav families={families} locale={locale} ocultarCta={ocultarCta} />
         </div>
       </div>
     </header>

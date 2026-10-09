@@ -130,10 +130,10 @@ export default async function InquiriesPage() {
                       <form action={markHandled}>
                         <input type="hidden" name="id" value={i.id} />
                         <button
-                          className={`rounded-[var(--radius-pill)] px-3 py-1.5 text-xs font-semibold transition-colors duration-[140ms] ${
+                          className={`btn-press rounded-[var(--radius-pill)] px-3 py-1.5 text-xs font-semibold ${
                             i.handled
                               ? 'border border-[var(--border-strong)] text-[var(--color-text-body)] hover:bg-[var(--surface-sunken)]'
-                              : 'bg-[image:var(--grad-signature)] text-pearl-0 hover:shadow-[var(--glow-signature)]'
+                              : 'bg-ocean-600 text-pearl-0 hover:bg-ocean-500 active:bg-ocean-700'
                           }`}
                         >
                           {i.handled ? 'Reabrir' : 'Marcar como tratado'}

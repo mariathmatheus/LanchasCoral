@@ -97,8 +97,17 @@ describe('URL de imagem', () => {
     expect(u.parse(`https://${host}/foto.jpg`)).toContain(host)
   })
 
-  it('aceita subdomínio de host permitido', () => {
-    expect(() => u.parse('https://cdn.mariath.dev/foto.jpg')).not.toThrow()
+  it('recusa foto hospedada fora do site', () => {
+    /* A lista de hosts externos ficou VAZIA quando as fotografias foram
+       trazidas para `/public/fotos`. Antes aqui se aceitava qualquer
+       subdomínio de `mariath.dev` — e foi aquele host sair do ar que deixou
+       388 fotos do catálogo quebradas em produção. */
+    expect(() => u.parse('https://cdn.mariath.dev/foto.jpg')).toThrow()
+    expect(() => u.parse('https://lanchascoral.com.br/wp-content/uploads/x.jpg')).toThrow()
+  })
+
+  it('aceita a foto migrada, servida pelo próprio site', () => {
+    expect(u.parse('/fotos/coral-40-abc123.webp')).toBe('/fotos/coral-40-abc123.webp')
   })
 
   it('aceita caminho interno', () => {

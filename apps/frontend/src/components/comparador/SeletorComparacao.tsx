@@ -84,7 +84,7 @@ export default function SeletorComparacao({
           <button
             type="button"
             onClick={() => router.push(base)}
-            className="shrink-0 rounded-[var(--radius-pill)] px-3 py-1.5 text-xs font-medium text-[var(--color-text-body)] transition-colors duration-[140ms] hover:text-ocean-700"
+            className="btn-press inline-flex min-h-11 shrink-0 items-center rounded-[var(--radius-pill)] px-3 text-xs font-medium text-[var(--color-text-body)] transition-colors duration-[140ms] hover:text-ocean-700"
           >
             {t.changeFirst}
           </button>

@@ -100,7 +100,7 @@ export default function TableFilter({
                   type="button"
                   aria-pressed={ativo}
                   onClick={() => setSituacao(op.value)}
-                  className={`inline-flex min-h-9 items-center gap-1.5 rounded-[var(--radius-pill)] px-3.5 font-body text-xs font-semibold transition-colors duration-[140ms] ${
+                  className={`btn-press inline-flex min-h-9 items-center gap-1.5 rounded-[var(--radius-pill)] px-3.5 font-body text-xs font-semibold transition-colors duration-[140ms] ${
                     ativo
                       ? 'bg-ocean-700 text-pearl-0'
                       : 'text-[var(--text-muted)] hover:text-[var(--text-strong)]'

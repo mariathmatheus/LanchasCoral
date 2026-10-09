@@ -9,11 +9,15 @@ export const dynamic = 'force-dynamic'
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const user = await currentUser()
 
-  // The login page renders its own bare shell.
-  if (!user) return <>{children}</>
+  // The login page renders its own bare shell — mas ainda precisa da marca
+  // `data-admin`, senao o botao flutuante de WhatsApp aparece sobre o login.
+  if (!user) return <div data-admin>{children}</div>
 
   return (
-    <div className="min-h-dvh bg-[var(--surface-page)]">
+    /* `data-admin`: o globals.css usa esta marca para esconder o botao
+       flutuante de WhatsApp, montado no layout raiz que o painel compartilha
+       com o site. */
+    <div data-admin className="min-h-dvh bg-[var(--surface-page)]">
       {/* Cabeçalho escuro da marca — mesma superfície das seções escuras do site. */}
       <header className="bg-[image:var(--grad-deep)] text-on-dark">
         {/* `min-h-16` e nao `h-16`: com altura fixa o `flex-wrap` nao tem

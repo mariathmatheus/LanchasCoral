@@ -3,6 +3,7 @@
 import { useActionState } from 'react'
 import { useFormStatus } from 'react-dom'
 import { submitInquiry, type ContactState } from '@/app/(pt)/contato/actions'
+import { SubmitButton } from '@/components/ui'
 import { getDict } from '@/i18n/dictionary'
 import type { Locale } from '@/i18n/config'
 
@@ -29,13 +30,9 @@ function Err({ msgs }: { msgs?: string[] }) {
 function Submit({ label, pendingLabel }: { label: string; pendingLabel: string }) {
   const { pending } = useFormStatus()
   return (
-    <button
-      type="submit"
-      disabled={pending}
-      className="inline-flex h-[58px] items-center justify-center rounded-[var(--radius-pill)] border border-transparent bg-[image:var(--grad-signature)] px-9 font-body text-[13px] font-bold uppercase tracking-[0.06em] text-pearl-0 shadow-[var(--shadow-sm)] transition-all duration-[240ms] ease-[var(--ease-glide)] hover:-translate-y-0.5 hover:shadow-[var(--glow-signature)] disabled:cursor-not-allowed disabled:opacity-60"
-    >
+    <SubmitButton type="submit" size="lg" disabled={pending}>
       {pending ? pendingLabel : label}
-    </button>
+    </SubmitButton>
   )
 }
 

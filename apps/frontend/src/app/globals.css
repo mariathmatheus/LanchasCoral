@@ -122,6 +122,10 @@
   --shadow-lg: 0 24px 56px -16px rgba(8, 12, 24, 0.24);
   --shadow-hover: 0 18px 40px -12px rgba(8, 12, 24, 0.22);
 
+  /* Tecla afundada: a sombra deixa de projetar para fora e passa a cair
+     DENTRO da peca, como a de um botao que recuou sob o dedo. */
+  --shadow-pressed: inset 0 2px 5px rgba(0, 0, 0, 0.28);
+
   /* Movement is water: it glides in and settles. Never bounces. */
   --ease-glide: cubic-bezier(0.22, 0.61, 0.36, 1);
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
@@ -225,6 +229,105 @@ body {
   font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+}
+
+/*
+ * Movimento padrão de tudo que se clica.
+ *
+ * Um botão só tem um jeito de reagir no site inteiro: ele NÃO sobe sob o
+ * cursor — botão que é apertado desce, não levanta — e afunda 1px ao ser
+ * pressionado, com a sombra virando interna. Vale igual para mouse e para
+ * toque, onde `hover` nem existe.
+ *
+ * Existe como classe, e não só no componente `Button`, porque vários botões
+ * reais do site são `<button>` de formulário (enviar, buscar, o painel
+ * administrativo) que nunca passaram por aquele componente. Antes cada um
+ * repetia a própria animação, e as três discordavam entre si.
+ */
+.btn-press {
+  cursor: pointer;
+  /* `translate` e não `transform`: é a propriedade que o Tailwind v4 escreve,
+     e uma transição declarada sobre `transform` não animaria nada. */
+  translate: 0 0;
+  transition:
+    translate var(--dur-base) var(--ease-glide),
+    box-shadow var(--dur-base) var(--ease-glide),
+    background-color var(--dur-base) var(--ease-glide),
+    border-color var(--dur-base) var(--ease-glide),
+    color var(--dur-base) var(--ease-glide);
+}
+
+.btn-press:active:not(:disabled) {
+  translate: 0 1px;
+  box-shadow: var(--shadow-pressed);
+  /* Afundar tem de ser imediato; a cor pode levar os 240ms de sempre. */
+  transition-duration: 75ms, 75ms, var(--dur-base), var(--dur-base), var(--dur-base);
+}
+
+.btn-press:disabled {
+  cursor: not-allowed;
+}
+
+/*
+ * Cursor de clique em tudo que responde ao clique.
+ *
+ * `<button>` não traz `cursor: pointer` por padrão no CSS do navegador, e o
+ * site usa botão de verdade em vários controles (abrir galeria, trocar
+ * modelo, abrir menu) — todos ficavam com a seta comum, sem sinal de que
+ * eram clicáveis. `:disabled` fica de fora: ali o cursor precisa dizer que
+ * não adianta clicar.
+ */
+:where(button, [role='button'], summary, label[for], select, a[href]):not(:disabled) {
+  cursor: pointer;
+}
+
+/*
+ * O badge da NerdResolve sai de baixo do botão flutuante de WhatsApp.
+ *
+ * Os dois moram no canto inferior direito — o badge preso ao rodapé, o botão
+ * fixo na janela — e quando o rodapé entra na tela o botão cobria o badge por
+ * inteiro: o link da assinatura ficava impossível de clicar. O badge recua
+ * para a esquerda o bastante para os dois conviverem, e só enquanto o botão
+ * existe na página (no painel administrativo ele não existe, e aí o badge
+ * volta ao canto).
+ */
+body:has([data-zap]) .nr-badge {
+  right: 5rem;
+}
+
+/*
+ * O botão flutuante de WhatsApp some no painel administrativo.
+ *
+ * Ele é montado no `Shell`, que é o layout raiz dos dois idiomas — e o painel
+ * vive dentro dessa mesma árvore. Em vez de propagar uma prop por camadas de
+ * layout só para isto, o painel se marca a si mesmo e a regra abaixo cuida do
+ * resto: quem cadastra barco não precisa de um atalho para falar com vendas.
+ */
+body:has([data-admin]) [data-zap] {
+  display: none;
+}
+
+/*
+ * Alvo de clique dos itens do menu do topo.
+ *
+ * O rótulo tem 20px de altura — é o traço de sublinhado do item ativo que
+ * exige a borda rente ao texto, então o link não pode simplesmente esticar.
+ * A área clicável cresce por um pseudo-elemento que cobre a altura da barra:
+ * o traço continua onde está e o alvo passa a ter os 44px que o dedo e o
+ * mouse impreciso precisam.
+ */
+.nav-alvo {
+  position: relative;
+}
+
+.nav-alvo::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  /* Cobre a altura util da barra ao redor do texto, sem passar dela. */
+  top: -12px;
+  bottom: -12px;
 }
 
 /* The system's container: 1320px max with a fluid gutter. */

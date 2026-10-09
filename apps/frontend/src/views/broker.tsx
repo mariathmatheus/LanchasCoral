@@ -80,7 +80,13 @@ export default async function BrokerView({
       </nav>
 
       {/* ============ ESTOQUE ============ */}
-      <section className="section-y relative isolate overflow-hidden bg-[var(--surface-page)]">
+      {/*
+        `pt-8` no lugar do `section-y` (ate 144px). A barra de filtros logo
+        acima ja termina com o contador de unidades, e o respiro cheio de secao
+        abria um vazio entre o filtro e o resultado DELE — dois passos da mesma
+        acao. Reduzido, nao colado: os 32px seguem separando as duas faixas.
+      */}
+      <section className="relative isolate overflow-hidden bg-[var(--surface-page)] pb-16 pt-8 lg:pb-20">
         <SwellLine side="right" tone="light" className="top-24" />
         <div className="container-page relative">
           {/* A grade precisa de um <h2> que a nomeie: sem ele os cards (h3)

@@ -2,6 +2,7 @@ import { Montserrat, JetBrains_Mono } from 'next/font/google'
 import JsonLd from '@/components/JsonLd'
 import { organizationSchema, websiteSchema } from '@/lib/schema'
 import { getTelefonesPublicados } from '@/lib/contatos'
+import BotaoZap from '@/components/BotaoZap'
 import './globals.css'
 
 /**
@@ -35,7 +36,13 @@ const jetbrains = JetBrains_Mono({
 
 export const fontVars = `${montserrat.variable} ${jetbrains.variable}`
 
-export async function Shell({ lang, children }: { lang: 'pt-BR' | 'en'; children: React.ReactNode }) {
+export async function Shell({
+  lang,
+  children,
+}: {
+  lang: 'pt-BR' | 'en'
+  children: React.ReactNode
+}) {
   /* Telefones do banco para o JSON-LD da organização. É uma consulta por
      renderização de layout, mas as páginas do site são estáticas ou
      revalidadas: na prática ela roda no build e a cada revalidação, não a
@@ -59,6 +66,10 @@ export async function Shell({ lang, children }: { lang: 'pt-BR' | 'en'; children
         {/* Identidade do estaleiro e do site: base do Knowledge Panel. */}
         <JsonLd data={[organizationSchema(telefones), websiteSchema()]} />
         {children}
+        {/* Atalho para o comercial, fixo em todas as paginas publicas. O
+            painel administrativo o esconde pelo seu proprio layout: quem esta
+            cadastrando barco nao precisa de um botao para falar com vendas. */}
+        <BotaoZap locale={lang === 'en' ? 'en' : 'pt'} />
       </body>
     </html>
   )

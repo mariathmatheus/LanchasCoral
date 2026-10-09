@@ -182,7 +182,7 @@ export default function ConfigEmailForm({ valores: v }: { valores: ConfigValores
           type="submit"
           formAction={testar}
           disabled={testando || salvando}
-          className="inline-flex min-h-11 items-center rounded-[var(--radius-pill)] border border-[var(--border-strong)] px-4 py-2 text-sm font-medium text-[var(--color-text-body)] transition-colors duration-[140ms] hover:bg-[var(--surface-sunken)] disabled:opacity-50"
+          className="btn-press inline-flex min-h-11 items-center rounded-[var(--radius-pill)] border border-[var(--border-strong)] px-4 py-2 text-sm font-medium text-[var(--color-text-body)] transition-colors duration-[140ms] hover:bg-[var(--surface-sunken)] disabled:opacity-50"
         >
           {testando ? 'Testando…' : 'Testar conexão'}
         </button>

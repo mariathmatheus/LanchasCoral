@@ -74,8 +74,11 @@ export default function CabecalhoLado({
         )}
 
         {/* Miniaturas sobre a foto: trocar sem tirar o olho do modelo. */}
+        {/* A folga de toque vem do proprio botao, que tem 28px de alvo com o
+            traco de 6px centrado. Antes o botao ERA o traco: 6x6px, quase
+            impossivel de acertar no dedo. */}
         {fotos.length > 1 && (
-          <div className="absolute inset-x-0 bottom-0 flex justify-center gap-1.5 bg-gradient-to-t from-navy-900/70 to-transparent p-2">
+          <div className="absolute inset-x-0 bottom-0 flex justify-center bg-gradient-to-t from-navy-900/70 to-transparent px-2">
             {fotos.map((f, i) => (
               <button
                 key={f}
@@ -83,10 +86,14 @@ export default function CabecalhoLado({
                 onClick={() => setFoto(i)}
                 aria-label={`${i + 1} / ${fotos.length}`}
                 aria-current={i === foto}
-                className={`h-1.5 rounded-full transition-all duration-200 ${
-                  i === foto ? 'w-5 bg-pearl-0' : 'w-1.5 bg-pearl-0/55 hover:bg-pearl-0/80'
-                }`}
-              />
+                className="group flex h-11 min-w-11 items-center justify-center"
+              >
+                <span
+                  className={`block h-1.5 rounded-full transition-all duration-200 ${
+                    i === foto ? 'w-5 bg-pearl-0' : 'w-1.5 bg-pearl-0/55 group-hover:bg-pearl-0/80'
+                  }`}
+                />
+              </button>
             ))}
           </div>
         )}
@@ -115,7 +122,7 @@ export default function CabecalhoLado({
         <QuoteDialog locale={locale} boatSlug={slug} boatLabel={rotulo}>
           <button
             type="button"
-            className="inline-flex min-h-10 items-center rounded-[var(--radius-pill)] bg-ocean-700 px-4 font-body text-[11px] font-bold uppercase tracking-[var(--tracking-wide)] text-pearl-0 transition-colors duration-[240ms] hover:bg-ocean-600"
+            className="btn-press inline-flex min-h-10 items-center rounded-[var(--radius-pill)] bg-ocean-700 px-4 font-body text-[11px] font-bold uppercase tracking-[var(--tracking-wide)] text-pearl-0 transition-colors duration-[240ms] hover:bg-ocean-600"
           >
             {t.requestQuote}
           </button>
@@ -123,7 +130,7 @@ export default function CabecalhoLado({
 
         <Link
           href={routeHref('modelos', locale, `/${slug}`)}
-          className="inline-flex min-h-10 items-center rounded-[var(--radius-pill)] border border-[var(--border-strong)] px-4 font-body text-[11px] font-bold uppercase tracking-[var(--tracking-wide)] text-[var(--text-strong)] transition-colors duration-[240ms] hover:border-ocean-700 hover:text-ocean-700"
+          className="btn-press inline-flex min-h-10 items-center rounded-[var(--radius-pill)] border border-[var(--border-strong)] px-4 font-body text-[11px] font-bold uppercase tracking-[var(--tracking-wide)] text-[var(--text-strong)] transition-colors duration-[240ms] hover:border-ocean-700 hover:text-ocean-700"
         >
           {t.seeFullSpecs}
         </Link>

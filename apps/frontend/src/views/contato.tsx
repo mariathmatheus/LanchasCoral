@@ -79,7 +79,7 @@ export default async function ContatoView({
               <br />
               <a
                 href={`tel:+55${COMPANY.phoneCommercial.replace(/\D/g, '')}`}
-                className="inline-block py-1.5 text-ocean-700 underline-offset-4 hover:text-aqua-600 hover:underline"
+                className="inline-flex min-h-11 items-center text-ocean-700 underline-offset-4 hover:text-aqua-600 hover:underline"
               >
                 {COMPANY.phoneCommercial}
               </a>
@@ -100,7 +100,7 @@ export default async function ContatoView({
                     {i > 0 && ' · '}
                     <a
                       href={`tel:+55${t.replace(/\D/g, '')}`}
-                      className="inline-block py-1.5 text-ocean-700 underline-offset-4 hover:text-aqua-600 hover:underline"
+                      className="inline-flex min-h-11 items-center text-ocean-700 underline-offset-4 hover:text-aqua-600 hover:underline"
                     >
                       {t}
                     </a>

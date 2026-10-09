@@ -35,8 +35,14 @@ export default function PageShell({
         </div>
       </section>
 
+      {/*
+        `pt-16` em vez do `section-y` cheio no TOPO: o cabeçalho escuro logo
+        acima já separa visualmente, e os 130px que o respiro de seção somava a
+        ele abriam uma faixa vazia entre o título da página e o seu conteúdo. A
+        base mantém o respiro inteiro, que é o que afasta o conteúdo do rodapé.
+      */}
       {children && (
-        <section className="section-y">
+        <section className="pb-[var(--section-y)] pt-16 lg:pt-20">
           <div className="container-page max-w-[var(--layout-narrow)]">{children}</div>
         </section>
       )}
