@@ -56,6 +56,12 @@ jobs:
       # isto o typecheck não encontra os tipos das tabelas.
       - name: Gerar cliente do Prisma
         working-directory: apps/frontend
+        # `prisma.config.ts` chama `env('DATABASE_URL')`, que lança se a
+        # variável não existir — mesmo num `generate`, que não conecta em
+        # banco nenhum. O valor abaixo é descartável: serve só para o config
+        # resolver. Medido: sem ele o passo falha com PrismaConfigEnvError.
+        env:
+          DATABASE_URL: postgresql://ci:ci@127.0.0.1:5432/ci?schema=public
         run: npx prisma generate
 
       # `npm run verificar` = tsc --noEmit + tsc dos testes + eslint + vitest.
