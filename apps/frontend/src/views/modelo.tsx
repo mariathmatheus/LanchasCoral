@@ -156,7 +156,18 @@ export default async function BoatView({ slug, locale }: { slug: string; locale:
               </h1>
             </div>
 
-            <div className="flex shrink-0 flex-wrap gap-3">
+            {/* `shrink-0` so a partir de `sm`. No celular ele impedia o grupo
+                de encolher: os quatro controles somavam 600px lado a lado, e
+                numa tela de 390 os dois ultimos — "Comparar" e "Solicitar
+                proposta" — ficavam inteiramente fora do viewport. O
+                `flex-wrap` daqui de dentro nao resolvia sozinho, porque o
+                `shrink-0` fazia o grupo reivindicar os 600px e nunca receber
+                uma largura que forcasse a quebra.
+
+                Medido num iPhone de 390px, em todos os modelos. De `sm` para
+                cima a largura sobra e o `shrink-0` volta a ser util: evita que
+                os botoes se espremam quando o titulo e longo. */}
+            <div className="flex w-full flex-wrap gap-3 sm:w-auto sm:shrink-0">
               <Button href="#ficha-tecnica" variant="outline-inverse" size="md">
                 {t.specsCta}
               </Button>
