@@ -1,29 +1,47 @@
 # Porta de entrada do site, ANTES da virada de domínio.
 #
-# Serve pelo IP, em HTTP, sem pedir certificado. É de propósito: o Caddy pede o
-# certificado assim que sobe, e o Let's Encrypt valida indo buscar um arquivo
-# em http://<domínio>/.well-known/. Enquanto `lanchascoral.com.br` apontar para
-# a Cloudflare (onde o WordPress ainda está), a validação volta 403 — e cada
-# falha conta contra o teto de 5 por hora da conta. Medido: a primeira subida
-# com o domínio declarado queimou algumas tentativas assim.
+# ## Por que não há domínio aqui
 #
-# No dia da virada, a sequência é:
+# O Caddy pede o certificado assim que sobe, e o Let's Encrypt valida indo
+# buscar um arquivo em `http://<domínio>/.well-known/`. Enquanto
+# `lanchascoral.com.br` apontar para a Cloudflare (onde o WordPress ainda
+# está), a validação volta 403 — e cada falha conta contra o teto de 5 por
+# hora da conta. Medido: a primeira subida com o domínio declarado queimou
+# algumas tentativas assim.
+#
+# ## Por que há HTTPS, mesmo sem domínio
+#
+# A CSP da aplicação manda `upgrade-insecure-requests`, que faz o navegador
+# reescrever todo `http://` para `https://`. Servindo o IP só em HTTP, o CSS e
+# as fontes eram pedidos num HTTPS que não existia e o navegador os bloqueava:
+# o site aparecia como HTML cru, sem estilo nenhum. Medido no navegador.
+#
+# O `tls internal` resolve com um certificado assinado pela autoridade local do
+# próprio Caddy. O navegador mostra aviso de certificado não confiável — é
+# esperado e aceita-se uma vez — mas a partir daí o site carrega inteiro, e dá
+# para conferir o produto de verdade antes de mexer no DNS.
+#
+# ## A virada
 #
 #   1. Registro A de lanchascoral.com.br e www → 216.128.171.143,
 #      com a nuvem da Cloudflare CINZA (laranja intercepta o desafio).
 #   2. `dig +short lanchascoral.com.br` devolvendo o IP.
 #   3. `cp infra/Caddyfile.dominio infra/Caddyfile` e commit.
-#   4. O deploy sobe o Caddy, que emite o certificado no primeiro acesso.
-#
-# A configuração final, com domínio e TLS, está em `Caddyfile.dominio`.
-{
-	email contato@lanchascoral.com.br
-	acme_ca https://acme-v02.api.letsencrypt.org/directory
-}
+#   4. O deploy recria o proxy, que emite o certificado no primeiro acesso.
+# Sem bloco global de ACME aqui de propósito: o `acme_ca` vira política padrão
+# para todos os sites e entra em conflito com o `tls internal` de um bloco sem
+# nome de host — o Caddy recusa a configuração inteira. Nada neste arquivo pede
+# certificado público, então não há o que configurar. O emissor fixo está no
+# `Caddyfile.dominio`, que é onde ele passa a valer.
 
-# `:80` sem nome de host: atende qualquer endereço, inclusive o IP cru, e não
-# dispara emissão de certificado nenhuma.
-:80 {
+# Sem nome de host: atende qualquer endereço, inclusive o IP cru. O Caddy não
+# pede certificado a autoridade nenhuma para um site assim.
+:80, :443 {
+	# Certificado assinado pela autoridade interna do Caddy. Não serve para o
+	# público — serve para o site se comportar como vai se comportar em
+	# produção, com a CSP valendo.
+	tls internal
+
 	reverse_proxy app:3000 {
 		# O IP real de quem acessa. Sem isto, o teto de envios por IP do
 		# formulário veria todos os visitantes como o mesmo endereço (o do
