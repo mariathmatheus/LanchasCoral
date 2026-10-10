@@ -1,18 +1,29 @@
-# Porta de entrada do site.
+# Porta de entrada do site, com o domínio oficial.
 #
-# O Caddy termina o TLS e repassa para a aplicação pela rede interna do
-# compose. Substitui o túnel Cloudflare como caminho definitivo: o túnel vive
-# numa conta de terceiro — a da agência, não a da Coral — e a entrega de um
-# site não deve depender da infraestrutura de quem o construiu.
+# O Caddy termina o TLS de lanchascoral.com.br e repassa para a aplicação pela
+# rede interna do compose. Substitui o túnel Cloudflare como caminho
+# definitivo: o túnel vive numa conta de terceiro — a da agência, não a da
+# Coral — e a entrega de um site não deve depender da infraestrutura de quem o
+# construiu.
 #
-# O certificado é emitido e renovado sozinho pelo Let's Encrypt, sem cron nem
-# passo manual. É o motivo de escolher Caddy em vez de Nginx aqui: num servidor
-# que ninguém vai administrar no dia a dia, um certificado que expira é o site
-# fora do ar. A validação é pelo desafio HTTP, então a porta 80 precisa
-# continuar aberta mesmo depois que todo o tráfego migrar para HTTPS.
+# ## O site fica ATRÁS da Cloudflare (nuvem laranja)
+#
+# A Cloudflare recebe o tráfego do público e conversa com este servidor. Isso
+# muda duas coisas, e as duas estão tratadas abaixo:
+#
+#   1. O IP de quem acessa chega em `CF-Connecting-IP`, não no IP da conexão —
+#      que é o da Cloudflare.
+#   2. O desafio HTTP do Let's Encrypt é respondido pela Cloudflare, não por
+#      este servidor, então a renovação automática FALHA com a nuvem laranja.
+#      Ver "Renovação" no fim deste arquivo.
+#
+# O modo de SSL na Cloudflare precisa ser **Full (strict)**. Em "Flexible" ela
+# falaria HTTP puro com este servidor, e o `upgrade-insecure-requests` da CSP
+# faria o navegador bloquear o CSS — o site apareceria sem estilo nenhum.
 {
 	# Para onde o Let's Encrypt avisa de certificado perto de expirar — o único
-	# aviso que chega antes de o site cair.
+	# aviso que chega antes de o site cair. Vale conferir que alguém lê esta
+	# caixa: é o alarme de incêndio desta configuração.
 	email contato@lanchascoral.com.br
 
 	# Emissor fixo. Sem esta linha o Caddy tenta o Let's Encrypt e, se falhar,
@@ -20,28 +31,48 @@
 	# ninguém escolheu nem acompanha. Melhor falhar visivelmente num emissor
 	# conhecido do que ter sucesso silencioso em outro.
 	acme_ca https://acme-v02.api.letsencrypt.org/directory
-}
 
-# ATENÇÃO à ordem da virada: o Caddy pede o certificado assim que sobe, e o
-# Let's Encrypt valida indo buscar um arquivo em http://<domínio>/.well-known/.
-# Enquanto o DNS apontar para outro lugar, a tentativa falha com 403 — e falhas
-# contam contra o teto de 5 por hora do Let's Encrypt. Por isso o domínio só
-# entra neste arquivo quando o registro A já estiver apontando para este
-# servidor, com a nuvem da Cloudflare CINZA: laranja faz a Cloudflare
-# interceptar o desafio e a emissão nunca conclui.
+	servers {
+		# Só aceita `X-Forwarded-*` e `CF-Connecting-IP` de quem está nas faixas
+		# abaixo. Sem isto, qualquer um na internet poderia forjar o cabeçalho e
+		# se passar por outro IP — burlando o teto de envios do formulário e
+		# envenenando o log de acesso.
+		#
+		# A lista é estática de propósito. O módulo `trusted_proxies cloudflare`,
+		# que a buscaria sozinha, NÃO vem na imagem oficial do Caddy: exige
+		# recompilar com xcaddy. Medido — `caddy validate` recusa com "module not
+		# registered: http.ip_sources.cloudflare".
+		#
+		# Estas faixas são as publicadas em https://www.cloudflare.com/ips/ e
+		# mudam raramente (a última alteração relevante foi em 2021). Se mudarem,
+		# o sintoma é o site ver todos os visitantes com o mesmo IP: compare com
+		# a lista do link e atualize aqui.
+		trusted_proxies static 			173.245.48.0/20 103.21.244.0/22 103.22.200.0/22 103.31.4.0/22 			141.101.64.0/18 108.162.192.0/18 190.93.240.0/20 188.114.96.0/20 			197.234.240.0/22 198.41.128.0/17 162.158.0.0/15 104.16.0.0/13 			104.24.0.0/14 172.64.0.0/13 131.0.72.0/22 			2400:cb00::/32 2606:4700::/32 2803:f800::/32 2405:b500::/32 			2405:8100::/32 2a06:98c0::/29 2c0f:f248::/32
+
+		# Recusa o cabeçalho de IP que venha de qualquer outra origem, em vez de
+		# aceitá-lo com ressalvas.
+		trusted_proxies_strict
+	}
+}
 
 lanchascoral.com.br {
 	# `app` é o nome do serviço no compose; o Docker resolve pela rede interna.
 	# A aplicação continua sem publicar porta no host — só o Caddy a alcança.
 	reverse_proxy app:3000 {
-		# O IP real de quem acessa. Sem isto, o teto de envios por IP do
-		# formulário veria todos os visitantes como o mesmo endereço (o do
-		# contêiner do Caddy) e barraria gente legítima depois de alguns envios.
-		header_up X-Real-IP {remote_host}
+		# O IP real de quem acessa. Com a Cloudflare na frente, o IP da conexão
+		# é o dela: `{remote_host}` daria o mesmo endereço para todo mundo, e o
+		# teto de envios por IP do formulário barraria gente legítima depois de
+		# alguns envios — ou deixaria passar um abuso vindo de um IP só.
+		#
+		# `{client_ip}` é o endereço real, extraído do `CF-Connecting-IP` e só
+		# confiável porque `trusted_proxies cloudflare` está declarado acima.
+		header_up X-Real-IP {client_ip}
 	}
 
 	# Compressão. O Next já serve o estático comprimido, mas o HTML renderizado
-	# no servidor sai cru — e é o que chega primeiro em toda navegação.
+	# no servidor sai cru — e é o que chega primeiro em toda navegação. A
+	# Cloudflare também comprime, mas isto vale para o trecho entre ela e aqui,
+	# e para o dia em que a nuvem for desligada.
 	encode zstd gzip
 
 	# Os cabeçalhos de segurança (CSP, HSTS, X-Frame-Options) são definidos pelo
@@ -64,3 +95,26 @@ lanchascoral.com.br {
 www.lanchascoral.com.br {
 	redir https://lanchascoral.com.br{uri} permanent
 }
+
+# ## Renovação — exige intervenção, a cada ~60 dias
+#
+# O Let's Encrypt valida indo buscar um arquivo em
+# `http://lanchascoral.com.br/.well-known/acme-challenge/...`. Com a nuvem
+# LARANJA, quem atende essa porta é a Cloudflare, não este servidor: ela
+# responde 403 e a validação falha. Medido — foi o que aconteceu na primeira
+# subida, antes da virada.
+#
+# O Caddy começa a tentar renovar 30 dias antes de vencer, então há um mês de
+# folga para agir. Quando o aviso do Let's Encrypt chegar no e-mail acima:
+#
+#   1. Nuvem CINZA no registro A de lanchascoral.com.br.
+#   2. `docker exec coral-proxy caddy reload --config /etc/caddy/Caddyfile`
+#      (ou esperar; ele tenta sozinho algumas vezes por dia).
+#   3. Conferir: `docker logs coral-proxy | grep -i "certificate obtained"`.
+#   4. Nuvem de volta para LARANJA.
+#
+# Para eliminar esse passo manual, a saída é validar por DNS-01 em vez de
+# HTTP-01: o Caddy cria um registro TXT na Cloudflare e a nuvem nunca precisa
+# sair do laranja. Exige um token de API da conta da Coral, com permissão só de
+# editar o DNS da zona, e uma imagem do Caddy com o plugin
+# `caddy-dns/cloudflare`. Vale fazer quando houver esse token.
