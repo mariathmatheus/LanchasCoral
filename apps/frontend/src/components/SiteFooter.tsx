@@ -140,8 +140,26 @@ export default async function SiteFooter({ locale = 'pt' }: { locale?: Locale } 
           <span>© {year} {t.footer.rights}</span>
           {/* `items-center` na linha: os links tem 44px de alvo de toque, e sem
               isto o separador ficava preso ao topo da linha, flutuando acima do
-              texto em vez de sentar entre os dois. */}
-          <span className="flex flex-wrap items-center gap-x-2">
+              texto em vez de sentar entre os dois.
+
+              `pr-14` reserva a calha do badge da NerdResolve, que e absoluto no
+              canto inferior direito do rodape. Sem ela, o ultimo link da linha
+              passava por baixo do badge: medido em ingles, onde "Cookie
+              preferences" e curto o bastante para caber na mesma linha, o
+              CENTRO do botao devolvia o badge no hit-test — o botao de
+              preferencias de cookies ficava inoperante. Em portugues o rotulo
+              e longo, quebra para a linha de baixo e escapava por acaso.
+
+              Revogar o consentimento precisa ser tao facil quanto da-lo, entao
+              um botao de preferencias que nao responde ao toque nao e detalhe
+              visual.
+
+              A calha vale em TODAS as larguras, nao so no celular: medido em
+              640 e 900px o centro do botao tambem devolvia o badge. So a partir
+              de ~1280px a linha fica larga o bastante para os dois nao se
+              encontrarem — e depender dessa folga seria deixar o defeito de
+              pe na metade dos monitores. */}
+          <span className="flex flex-wrap items-center gap-x-2 pr-14">
             <Link prefetch={false} href={href('privacidade', locale)} className="inline-flex min-h-11 items-center transition-colors hover:text-pearl-0">
               {t.footer.privacy}
             </Link>
