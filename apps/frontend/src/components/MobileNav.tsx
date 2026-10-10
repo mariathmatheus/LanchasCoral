@@ -78,16 +78,21 @@ export default function MobileNav({
         onClick={() => setOpen(true)}
         aria-expanded={open}
         aria-label={t.nav.openMenu}
-        /* 44px é o mínimo das WCAG para alvo de toque; eram 36. A margem
-           negativa puxa a folga para fora, então o ícone não se desloca no
-           cabeçalho.
+        /* 44px é o mínimo das WCAG para alvo de toque; eram 36.
            
-           Só a partir de `sm`: em telas de 320px o gutter é de 20px e os 8px
-           negativos faziam o botão terminar em 326px — a página inteira
-           passava a arrastar para o lado por causa desses 6px. Medido num
-           iPhone SE. Abaixo de `sm` o ícone fica 8px mais para dentro, o que
-           ninguém nota, e a página não arrasta. */
-        className="flex h-11 w-11 items-center justify-center text-pearl-0 sm:-mr-2"
+           SEM margem negativa. Ela existia para o ícone não parecer deslocado
+           dentro do alvo ampliado, mas puxava o botão 8px para fora da calha:
+           em telas de 320px, onde o gutter é de 20px, o botão terminava em
+           326px e 6px do alvo ficavam cortados na borda.
+           
+           A tentativa anterior foi restringir com `sm:-mr-2`. Não funciona: o
+           Tailwind v4 não gera a variante para margem negativa — a classe
+           aparece no HTML, a regra nunca entra no CSS, e o `-mr-2` sem prefixo
+           segue valendo em toda largura. Conferido no bundle servido.
+           
+           Sem a margem o ícone fica 8px mais para dentro em todas as telas.
+           É diferença que ninguém nota, e o alvo fica inteiro. */
+        className="flex h-11 w-11 items-center justify-center text-pearl-0"
       >
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
           <path d="M3 6h18M3 12h18M3 18h18" />
@@ -110,16 +115,21 @@ export default function MobileNav({
                 type="button"
                 onClick={close}
                 aria-label={t.nav.closeMenu}
-                /* 44px é o mínimo das WCAG para alvo de toque; eram 36. A margem
-           negativa puxa a folga para fora, então o ícone não se desloca no
-           cabeçalho.
+                /* 44px é o mínimo das WCAG para alvo de toque; eram 36.
            
-           Só a partir de `sm`: em telas de 320px o gutter é de 20px e os 8px
-           negativos faziam o botão terminar em 326px — a página inteira
-           passava a arrastar para o lado por causa desses 6px. Medido num
-           iPhone SE. Abaixo de `sm` o ícone fica 8px mais para dentro, o que
-           ninguém nota, e a página não arrasta. */
-        className="flex h-11 w-11 items-center justify-center text-pearl-0 sm:-mr-2"
+           SEM margem negativa. Ela existia para o ícone não parecer deslocado
+           dentro do alvo ampliado, mas puxava o botão 8px para fora da calha:
+           em telas de 320px, onde o gutter é de 20px, o botão terminava em
+           326px e 6px do alvo ficavam cortados na borda.
+           
+           A tentativa anterior foi restringir com `sm:-mr-2`. Não funciona: o
+           Tailwind v4 não gera a variante para margem negativa — a classe
+           aparece no HTML, a regra nunca entra no CSS, e o `-mr-2` sem prefixo
+           segue valendo em toda largura. Conferido no bundle servido.
+           
+           Sem a margem o ícone fica 8px mais para dentro em todas as telas.
+           É diferença que ninguém nota, e o alvo fica inteiro. */
+        className="flex h-11 w-11 items-center justify-center text-pearl-0"
               >
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
                   <path d="M6 6l12 12M18 6L6 18" />

@@ -315,6 +315,25 @@ body {
  * existe na página (no painel administrativo ele não existe, e aí o badge
  * volta ao canto).
  */
+/*
+ * O botao do WhatsApp sobe enquanto o banner de cookies esta na tela.
+ *
+ * O banner e `fixed bottom-0` com z-130; o botao e `fixed bottom-5` com z-40.
+ * Na primeira visita de qualquer pessoa, o banner cobria o botao por inteiro —
+ * e o toque no WhatsApp acionava o "Aceitar" que estava por baixo do dedo.
+ *
+ * Medido em 320, 390 e 430px: `elementFromPoint` no centro do botao devolvia o
+ * botao "Aceitar" do banner, em todas. Nao era so um controle inalcancavel:
+ * era consentimento obtido por engano de quem so queria falar com o estaleiro,
+ * o oposto do que o Art. 8o da LGPD pede.
+ *
+ * O banner tem altura variavel (o texto reflui conforme a largura), entao o
+ * recuo e generoso: 11rem cobre as tres linhas do pior caso em 320px.
+ */
+body:has([data-consentimento]) [data-zap] {
+  bottom: 11rem;
+}
+
 body:has([data-zap]) .nr-badge {
   right: 5rem;
 }

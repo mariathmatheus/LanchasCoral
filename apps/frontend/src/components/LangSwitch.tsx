@@ -90,7 +90,17 @@ export default function LangSwitch({ current }: { current: Locale }) {
             }`}
           >
             <Flag className="h-3.5 w-[19px] rounded-[1px] ring-1 ring-black/25" />
-            <span className="font-mono text-[10px] font-medium uppercase tracking-[0.08em] text-pearl-0">
+            {/* O rotulo ("BR"/"US") some abaixo de 360px. A bandeira sozinha
+                ja identifica o idioma, e os dois juntos custavam 129px de
+                largura — num aparelho de 320px, onde sobram 280px de conteudo,
+                isso espremia o botao do menu contra a borda da tela.
+                
+                Medido num iPhone SE: com o rotulo, a linha de acoes media
+                181px e o menu terminava em 326px, 6px fora da tela.
+                
+                `aria-label` no link continua dizendo o idioma por extenso,
+                entao nada se perde para quem usa leitor de tela. */}
+            <span className="hidden font-mono text-[10px] font-medium uppercase tracking-[0.08em] text-pearl-0 min-[360px]:inline">
               {meta.flag}
             </span>
           </Link>

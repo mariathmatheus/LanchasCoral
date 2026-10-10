@@ -172,6 +172,9 @@ export default function Consentimento({ locale = 'pt' }: { locale?: Locale }) {
       role="dialog"
       aria-modal="false"
       aria-labelledby="consentimento-titulo"
+      /* Marcador para o CSS: enquanto o banner ocupa o rodape, o botao
+         flutuante do WhatsApp precisa subir. Ver globals.css. */
+      data-consentimento
       /* `z-[130]`: acima dos diálogos (z-120), porque a escolha precede
          qualquer outra interação. Ancorado embaixo para não cobrir o conteúdo
          que a pessoa veio ler.

@@ -94,43 +94,62 @@ export default function Carousel({
 
       {pages > 1 && (
         <div className="mt-8 flex items-center justify-between gap-3 sm:gap-6">
-          {/* `min-w-0` + `overflow-hidden`: com muitas paginas, os pontos
-              somavam mais largura que a tela e empurravam as setas para fora
-              do viewport. Medido num aparelho de 393px com 6 modelos: o botao
-              "Proximo" comecava em 402px, inteiramente invisivel.
-
-              Agora o grupo de pontos encolhe e, se ainda assim nao couber,
-              corta — as setas, que sao o controle principal, ficam sempre
-              visiveis. `shrink-0` nelas garante isso. */}
-          <div
-            className="flex min-w-0 items-center gap-2 overflow-hidden"
-            role="tablist"
-            aria-label={label}
-          >
-            {Array.from({ length: pages }, (_, i) => (
-              <button
-                key={i}
-                type="button"
-                role="tab"
-                aria-selected={i === page}
-                aria-label={`${i + 1} / ${pages}`}
-                onClick={() => toPage(i)}
-                // O botao tem 44px de alvo com padding transparente; o traco
-                // visual continua com 6px. Sem isso o alvo real era 6x6px.
-                // `min-w-11`: com `px-2` o ponto inativo (6px) dava 22px de
-                // largura — alto o bastante, mas estreito demais para o dedo.
-                className="group flex h-11 min-w-11 items-center justify-center px-2"
-              >
-                <span
-                  className={`block h-1.5 rounded-full transition-all duration-[240ms] ease-[var(--ease-glide)] ${
-                    i === page
-                      ? 'w-7 bg-ocean-700'
-                      : 'w-1.5 bg-[var(--border-strong)] group-hover:bg-[var(--text-muted)]'
-                  }`}
-                />
-              </button>
-            ))}
-          </div>
+          {/* ## Pontos ou contador, conforme couber
+          
+              Cada ponto tem 44px de alvo — o minimo das WCAG para o dedo —
+              entao seis paginas pedem 304px so de indicadores. Num celular de
+              360px, onde sobram 210px, nao cabe.
+          
+              A tentativa anterior foi `overflow-hidden`: as setas ficavam
+              visiveis e os pontos excedentes eram cortados. Protegeu o controle
+              errado. Medido: em 320px os pontos 4, 5 e 6 sumiam, e em TODOS os
+              celulares pelo menos o ultimo ficava inalcancavel — um controle
+              que existe no DOM, responde a leitor de tela e nao pode ser
+              tocado e pior que controle nenhum.
+          
+              Acima de quatro paginas, os pontos dao lugar a um contador. Ele
+              informa a mesma coisa — onde estou, quantas ha — em 60px, e quem
+              navega usa as setas, que e o que o dedo alcanca de qualquer forma.
+          
+              O `aria-live` anuncia a mudanca para quem usa leitor de tela, que
+              antes recebia isso pelos `aria-selected` dos pontos. */}
+          {pages <= 4 ? (
+            <div className="flex items-center gap-2" role="tablist" aria-label={label}>
+              {Array.from({ length: pages }, (_, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  role="tab"
+                  aria-selected={i === page}
+                  aria-label={`${i + 1} / ${pages}`}
+                  onClick={() => toPage(i)}
+                  // O botao tem 44px de alvo com padding transparente; o traco
+                  // visual continua com 6px. Sem isso o alvo real era 6x6px.
+                  // `min-w-11`: com `px-2` o ponto inativo (6px) dava 22px de
+                  // largura — alto o bastante, mas estreito demais para o dedo.
+                  className="group flex h-11 min-w-11 items-center justify-center px-2"
+                >
+                  <span
+                    className={`block h-1.5 rounded-full transition-all duration-[240ms] ease-[var(--ease-glide)] ${
+                      i === page
+                        ? 'w-7 bg-ocean-700'
+                        : 'w-1.5 bg-[var(--border-strong)] group-hover:bg-[var(--text-muted)]'
+                    }`}
+                  />
+                </button>
+              ))}
+            </div>
+          ) : (
+            <p
+              aria-live="polite"
+              aria-label={`${label}: ${page + 1} de ${pages}`}
+              className="flex h-11 shrink-0 items-center font-mono text-xs tabular-nums text-[var(--text-muted)]"
+            >
+              <span className="font-bold text-[var(--text-strong)]">{page + 1}</span>
+              <span className="px-1">/</span>
+              {pages}
+            </p>
+          )}
 
           <div className="flex shrink-0 gap-2.5">
             <button
