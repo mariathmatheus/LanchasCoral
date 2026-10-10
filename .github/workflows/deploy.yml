@@ -123,11 +123,18 @@ jobs:
 
             echo "::group::Construindo e subindo"
             # `--allow=network.host`: o build precisa falar com o Postgres em
-            # 127.0.0.1:5433 (seis rotas pré-renderizam conteúdo do banco), e o
-            # Docker 29 passou a exigir que esse acesso seja autorizado de
-            # forma explícita em vez de herdado do compose. Sem a flag o build
-            # para com "additional privileges requested".
-            docker compose --env-file .env -f infra/docker-compose.yml up -d --build --allow=network.host
+            # O build precisa falar com o Postgres em 127.0.0.1:5433 — seis
+            # rotas pré-renderizam conteúdo do banco. O Docker 29 deixou de
+            # herdar essa permissão do `network: host` do compose e passou a
+            # exigir `--allow=network.host`, que NÃO existe em `compose up`
+            # nem em `compose build`: é flag do `buildx bake`. Medido no
+            # servidor — `compose up --allow` responde "unknown flag".
+            #
+            # Daí os três passos: o compose gera a definição do build, o bake
+            # constrói com a permissão, e o up apenas sobe a imagem pronta.
+            docker compose --env-file .env -f infra/docker-compose.yml build --print > /tmp/coral-bake.json
+            docker buildx bake -f /tmp/coral-bake.json --allow=network.host --set '*.output=type=docker'
+            docker compose --env-file .env -f infra/docker-compose.yml up -d --no-build
             echo "::endgroup::"
 
             echo "::group::Esperando ficar saudável"
