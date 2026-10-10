@@ -19,6 +19,21 @@ const fmt = new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: 's
  */
 const DIAS_DE_RETENCAO = 30
 
+/**
+ * Só o domínio de quem indicou, para a etiqueta não ficar com a URL inteira.
+ *
+ * `new URL` lança quando o valor é malformado — e o referrer vem do navegador
+ * do visitante, não de uma fonte confiável. Numa página de servidor, essa
+ * exceção derrubaria a lista inteira de contatos por causa de uma linha ruim.
+ */
+function hostDe(url: string): string {
+  try {
+    return new URL(url).hostname
+  } catch {
+    return url.slice(0, 40)
+  }
+}
+
 export default async function InquiriesPage() {
   await requireAdmin()
 
@@ -142,11 +157,53 @@ export default async function InquiriesPage() {
                     </div>
                   </div>
 
-                  {i.boatSlug && (
-                    <p className="mt-3 inline-block rounded-[var(--radius-pill)] bg-[var(--surface-sunken)] px-2.5 py-1 font-mono text-xs text-[var(--color-text-body)]">
-                      Modelo: {i.boatSlug}
-                    </p>
-                  )}
+                  <div className="mt-3 flex flex-wrap items-center gap-2">
+                    {i.boatSlug && (
+                      <p className="inline-block rounded-[var(--radius-pill)] bg-[var(--surface-sunken)] px-2.5 py-1 font-mono text-xs text-[var(--color-text-body)]">
+                        Modelo: {i.boatSlug}
+                      </p>
+                    )}
+
+                    {/*
+                      De onde veio este lead.
+                      Quem atende precisa saber, ao ligar, se a pessoa chegou
+                      por um anúncio pago ou pela busca — muda o tom da conversa
+                      e é o único jeito de descobrir qual campanha se paga.
+                      Só aparece quando há origem: lead orgânico não ganha
+                      etiqueta vazia.
+                    */}
+                    {i.utmSource && (
+                      <p
+                        title={[
+                          i.utmCampaign && `campanha: ${i.utmCampaign}`,
+                          i.utmTerm && `termo: ${i.utmTerm}`,
+                          i.landingPath && `entrou por: ${i.landingPath}`,
+                        ]
+                          .filter(Boolean)
+                          .join(' · ')}
+                        className="inline-block rounded-[var(--radius-pill)] bg-ocean-700/12 px-2.5 py-1 font-mono text-xs font-semibold text-ocean-800"
+                      >
+                        {i.utmSource}
+                        {i.utmMedium ? ` / ${i.utmMedium}` : ''}
+                        {i.utmCampaign ? ` · ${i.utmCampaign}` : ''}
+                      </p>
+                    )}
+
+                    {/* Clique pago identificado: o Google e o Meta casam a
+                        conversão com o anúncio exato por este código. */}
+                    {(i.gclid || i.fbclid) && (
+                      <p className="inline-block rounded-[var(--radius-pill)] bg-success-500/12 px-2.5 py-1 text-xs font-semibold text-[var(--color-success-text)]">
+                        {i.gclid ? 'clique Google Ads' : 'clique Meta'}
+                      </p>
+                    )}
+
+                    {/* Sem UTM mas com site de origem: tráfego de indicação. */}
+                    {!i.utmSource && i.referrer && (
+                      <p className="inline-block rounded-[var(--radius-pill)] bg-[var(--surface-sunken)] px-2.5 py-1 font-mono text-xs text-[var(--text-muted)]">
+                        veio de: {hostDe(i.referrer)}
+                      </p>
+                    )}
+                  </div>
                   {i.message && (
                     <p className="mt-3 whitespace-pre-line text-sm leading-relaxed text-[var(--color-text-body)]">
                       {i.message}

@@ -19,6 +19,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     'sobre',
     'vender',
     'dicas',
+    /* O comparador tem URL propria e canonica (sem a query a=&b=): e pagina de
+       cauda longa — quem busca "coral 33 ou coral 36" cai nela. Ficava fora do
+       sitemap por esquecimento, nao por decisao. */
+    'comparar',
     'contatos',
     'contato',
     'servicos',
@@ -37,6 +41,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       languages: {
         'pt-BR': `${BASE}${ptPath}`,
         en: `${BASE}/en${enPath === '/' ? '' : enPath}`,
+        /* O <head> declara x-default (ver lib/alternates.ts) e o sitemap
+           precisa concordar: duas fontes divergentes sobre o mesmo cluster de
+           idioma e sinal conflitante, e o Google costuma descartar o conjunto. */
+        'x-default': `${BASE}${ptPath}`,
       },
     },
   })

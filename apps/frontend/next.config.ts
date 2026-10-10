@@ -41,6 +41,56 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
 
   async headers() {
+    /*
+     * Hosts do Google Tag Manager, GA4, Google Ads e Meta Pixel.
+     *
+     * Enumerados um a um de proposito. O site coleta nome, e-mail e telefone
+     * em sete formularios, e `connect-src 'self'` era a trava que impedia um
+     * XSS de mandar esses dados para fora. Abrir `connect-src` devolve um
+     * canal de saida a quem conseguir injetar script — o risco e real e foi
+     * aceito para viabilizar a mensuracao de campanha.
+     *
+     * Duas consequencias praticas disso:
+     *   - a lista nunca deve virar curinga (`*.google.com` inclui dominio de
+     *     conteudo de terceiro; `https:` libera a internet inteira);
+     *   - NADA disto entra no `cspAdmin`. O painel lista leads com dados
+     *     pessoais e la a trava continua fechada.
+     */
+    const TAG = {
+      script: [
+        'https://www.googletagmanager.com',
+        'https://www.google-analytics.com',
+        'https://www.googleadservices.com',
+        'https://googleads.g.doubleclick.net',
+        'https://connect.facebook.net',
+      ],
+      connect: [
+        'https://www.googletagmanager.com',
+        'https://www.google-analytics.com',
+        'https://*.google-analytics.com',
+        'https://*.analytics.google.com',
+        'https://stats.g.doubleclick.net',
+        'https://www.google.com',
+        'https://www.facebook.com',
+        'https://graph.facebook.com',
+      ],
+      img: [
+        'https://www.googletagmanager.com',
+        'https://www.google-analytics.com',
+        'https://*.google-analytics.com',
+        'https://www.google.com',
+        'https://www.google.com.br',
+        'https://googleads.g.doubleclick.net',
+        'https://stats.g.doubleclick.net',
+        'https://www.facebook.com',
+      ],
+      frame: [
+        'https://www.googletagmanager.com',
+        'https://td.doubleclick.net',
+        'https://bid.g.doubleclick.net',
+      ],
+    }
+
     const base = [
       { key: 'X-Content-Type-Options', value: 'nosniff' },
       { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
@@ -69,14 +119,23 @@ const nextConfig: NextConfig = {
      */
     const cspPublico = [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline'",
+      /* Google Tag Manager e os pixels que ele carrega. Host a host, nunca
+         curinga: `script-src https:` deixaria qualquer servidor do mundo
+         injetar codigo nesta pagina. */
+      `script-src 'self' 'unsafe-inline' ${TAG.script.join(' ')}`,
       "style-src 'self' 'unsafe-inline'",
-      /* Só o próprio domínio: as fotos agora moram em `/public/fotos`.
-         `data:`/`blob:` seguem porque o next/image os usa no placeholder. */
-      "img-src 'self' data: blob:",
+      /* As fotos moram em `/public/fotos`; os hosts de tag entram por causa
+         dos pixels 1x1 de conversao, que ainda chegam como <img> em navegador
+         antigo. `data:`/`blob:` seguem para o placeholder do next/image. */
+      `img-src 'self' data: blob: ${TAG.img.join(' ')}`,
       "media-src 'self'",
       "font-src 'self' data:",
-      "connect-src 'self'",
+      /* Por onde os eventos saem. Ver o aviso sobre exfiltracao acima. */
+      `connect-src 'self' ${TAG.connect.join(' ')}`,
+      /* O Preview do GTM e o remarketing do Ads abrem iframe; sem esta
+         diretiva o `default-src 'self'` os bloqueia e parece que "o GTM nao
+         funciona". */
+      `frame-src 'self' ${TAG.frame.join(' ')}`,
       "form-action 'self'",
       /* O site não deve ser emoldurado por ninguém — mesma intenção do
          X-Frame-Options, na versão que os navegadores modernos respeitam. */

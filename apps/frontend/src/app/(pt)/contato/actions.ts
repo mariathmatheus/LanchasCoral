@@ -14,6 +14,18 @@ const schema = z.object({
   kind: z
     .enum(['CONTATO', 'PROPOSTA', 'VISITA', 'SERVICOS', 'MANUAL', 'TRABALHE', 'BROKER', 'ANUNCIAR'])
     .default('CONTATO'),
+  /* Origem da visita, vinda do navegador (ver components/Atribuicao.tsx).
+     Opcionais porque lead organico nao tem nenhuma, e com teto curto porque
+     o valor vem da barra de enderecos — e campo que o visitante controla. */
+  utmSource: z.string().trim().max(200).optional(),
+  utmMedium: z.string().trim().max(200).optional(),
+  utmCampaign: z.string().trim().max(200).optional(),
+  utmTerm: z.string().trim().max(200).optional(),
+  utmContent: z.string().trim().max(200).optional(),
+  gclid: z.string().trim().max(200).optional(),
+  fbclid: z.string().trim().max(200).optional(),
+  referrer: z.string().trim().max(200).optional(),
+  landingPath: z.string().trim().max(200).optional(),
   // Honeypot: preenchido apenas por bots.
   website: z.string().max(0).optional(),
 })
@@ -45,6 +57,17 @@ export async function submitInquiry(
     message: fd.get('message') ?? undefined,
     boatSlug: fd.get('boatSlug') ?? undefined,
     kind: fd.get('kind') ?? 'CONTATO',
+    /* Origem da visita. Anexada pelo ContactForm no momento do envio; ausente
+       quando o lead e organico ou o storage esta bloqueado. */
+    utmSource: fd.get('utmSource') ?? undefined,
+    utmMedium: fd.get('utmMedium') ?? undefined,
+    utmCampaign: fd.get('utmCampaign') ?? undefined,
+    utmTerm: fd.get('utmTerm') ?? undefined,
+    utmContent: fd.get('utmContent') ?? undefined,
+    gclid: fd.get('gclid') ?? undefined,
+    fbclid: fd.get('fbclid') ?? undefined,
+    referrer: fd.get('referrer') ?? undefined,
+    landingPath: fd.get('landingPath') ?? undefined,
     website: fd.get('website') ?? undefined,
   })
 
@@ -85,6 +108,18 @@ export async function submitInquiry(
         message: data.message || null,
         boatSlug: data.boatSlug || null,
         kind: data.kind,
+        /* Gravada junto com o lead, e nao so no analytics: bloqueador de
+           anuncio, cookie recusado e tag mal configurada fazem o relatorio da
+           plataforma divergir: o banco e a fonte que sobrevive aos tres. */
+        utmSource: data.utmSource || null,
+        utmMedium: data.utmMedium || null,
+        utmCampaign: data.utmCampaign || null,
+        utmTerm: data.utmTerm || null,
+        utmContent: data.utmContent || null,
+        gclid: data.gclid || null,
+        fbclid: data.fbclid || null,
+        referrer: data.referrer || null,
+        landingPath: data.landingPath || null,
       },
     })
   } catch {

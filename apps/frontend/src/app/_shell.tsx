@@ -3,6 +3,7 @@ import JsonLd from '@/components/JsonLd'
 import { organizationSchema, websiteSchema } from '@/lib/schema'
 import { getTelefonesPublicados } from '@/lib/contatos'
 import BotaoZap from '@/components/BotaoZap'
+import Atribuicao from '@/components/Atribuicao'
 import './globals.css'
 
 /**
@@ -65,6 +66,9 @@ export async function Shell({
         />
         {/* Identidade do estaleiro e do site: base do Knowledge Panel. */}
         <JsonLd data={[organizationSchema(telefones), websiteSchema()]} />
+        {/* Grava a origem da visita na primeira pagina aberta — antes que a
+            navegacao leve a query string embora. Nao renderiza nada. */}
+        <Atribuicao />
         {children}
         {/* Atalho para o comercial, fixo em todas as paginas publicas. O
             painel administrativo o esconde pelo seu proprio layout: quem esta

@@ -4,6 +4,7 @@ import { useActionState } from 'react'
 import { useFormStatus } from 'react-dom'
 import { submitInquiry, type ContactState } from '@/app/(pt)/contato/actions'
 import { SubmitButton } from '@/components/ui'
+import { lerAtribuicao } from '@/components/Atribuicao'
 import { getDict } from '@/i18n/dictionary'
 import type { Locale } from '@/i18n/config'
 
@@ -70,7 +71,26 @@ export default function ContactForm({
   messagePlaceholder?: string
   submitLabel?: string
 }) {
-  const [state, action] = useActionState<ContactState, FormData>(submitInquiry, {})
+  const [state, enviar] = useActionState<ContactState, FormData>(submitInquiry, {})
+
+  /*
+   * A origem entra no FormData no momento do ENVIO, nao na renderizacao.
+   *
+   * Renderizar campos ocultos a partir de `sessionStorage` exigiria ler no
+   * cliente depois da montagem — e isso significa estado, efeito e um HTML que
+   * nasce diferente do que o servidor gerou. Aqui o `action` e so embrulhado:
+   * quando a pessoa envia, a atribuicao e anexada com o valor mais recente.
+   *
+   * Se o storage estiver bloqueado, `lerAtribuicao()` devolve `{}` e o envio
+   * segue igual: perder a origem nao pode perder o lead.
+   */
+  const action = (dados: FormData) => {
+    for (const [campo, valor] of Object.entries(lerAtribuicao())) {
+      if (valor) dados.set(campo, valor)
+    }
+    return enviar(dados)
+  }
+
   const t = getDict(locale).form
 
   if (state.ok) {
@@ -90,6 +110,7 @@ export default function ContactForm({
     <form action={action} className="grid grid-cols-1 gap-6 sm:grid-cols-2">
       {boatSlug && !boatOptions && <input type="hidden" name="boatSlug" value={boatSlug} />}
       <input type="hidden" name="kind" value={kind ?? (boatSlug ? 'PROPOSTA' : 'CONTATO')} />
+
 
       {boatOptions && boatOptions.length > 0 && (
         <div className="sm:col-span-2">

@@ -140,7 +140,32 @@ model Inquiry {
   manualSentAt DateTime?
   manualSentTo String?
 
+  /// De onde veio quem preencheu o formulário.
+  ///
+  /// Sem isto, um lead que custou R$ 80 de clique no Google é indistinguível
+  /// de um que chegou sozinho pela busca — e não há como saber qual campanha
+  /// se paga. Colunas tipadas, e não um JSON, para que o painel possa agrupar
+  /// e ordenar por origem sem ler cada linha.
+  ///
+  /// Preenchido pelo próprio navegador (ver `AtribuicaoCampo`): são dados que
+  /// o visitante controla, então entram validados e com tamanho limitado.
+  utmSource   String?
+  utmMedium   String?
+  utmCampaign String?
+  utmTerm     String?
+  utmContent  String?
+  /// Identificadores de clique do Google Ads e do Meta. Valem mais que as
+  /// UTMs: sobrevivem a redirecionamento e são o que as plataformas usam para
+  /// casar a conversão com o anúncio exato.
+  gclid       String?
+  fbclid      String?
+  /// Site que trouxe a visita, e a primeira página vista nesta sessão.
+  referrer    String?
+  landingPath String?
+
   @@index([handled, createdAt])
+  /// Para o painel responder "quantos leads cada origem trouxe neste mês".
+  @@index([utmSource, createdAt])
 }
 
 /// Coral Broker: embarcacoes seminovas intermediadas pelo estaleiro.
