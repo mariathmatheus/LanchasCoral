@@ -49,7 +49,11 @@ services:
       network: host
       args:
         DATABASE_URL: postgresql://coral:${POSTGRES_PASSWORD:?defina POSTGRES_PASSWORD no .env}@127.0.0.1:5433/coral?schema=public
-        NEXT_PUBLIC_SITE_URL: https://coral.nerdresolve.com
+        # O endereco publico do site. Entra no canonical, no hreflang, no
+        # sitemap, no robots e no JSON-LD — e e assado na imagem, porque
+        # `NEXT_PUBLIC_*` e resolvido em tempo de build. Trocar exige
+        # reconstruir, nao basta reiniciar o conteiner.
+        NEXT_PUBLIC_SITE_URL: https://lanchascoral.com.br
     image: coral-app:latest
     container_name: coral-app
     restart: unless-stopped
@@ -58,7 +62,11 @@ services:
       # o contêiner do Postgres, e a porta é a interna (5432), não a 5433
       # publicada no host.
       DATABASE_URL: postgresql://coral:${POSTGRES_PASSWORD:?defina POSTGRES_PASSWORD no .env}@db:5432/coral?schema=public
-      NEXT_PUBLIC_SITE_URL: https://coral.nerdresolve.com
+      # Precisa ser IGUAL ao `args` do build acima. O valor que o navegador
+      # recebe vem da imagem; este aqui serve ao que roda no servidor (o
+      # link do memorial no e-mail, por exemplo). Divergir faria o e-mail
+      # apontar para um endereco e a pagina para outro.
+      NEXT_PUBLIC_SITE_URL: https://lanchascoral.com.br
       NODE_ENV: production
       # As variáveis de SMTP NÃO são declaradas aqui de propósito: elas
       # entram pelo `env_file` abaixo. Declará-las com `${SMTP_HOST:-}` faria

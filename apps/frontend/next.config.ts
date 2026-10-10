@@ -40,6 +40,35 @@ const nextConfig: NextConfig = {
    */
   poweredByHeader: false,
 
+  /**
+   * Endereços do site antigo que o Google já indexou.
+   *
+   * O WordPress em lanchascoral.com.br publica as fichas em `/listings/<slug>`
+   * e os contatos em `/nossos-contatos`. No site novo as mesmas páginas vivem
+   * em `/modelos/<slug>` e `/contatos`, com os MESMOS slugs. Quando o domínio
+   * apontar para cá, cada um desses endereços viraria 404 — e com ele some a
+   * posição que a página já tem na busca, além dos links que apontam para ela
+   * de fora.
+   *
+   * `permanent: true` emite 301: o Google transfere a autoridade da URL antiga
+   * para a nova em vez de tratar como página nova. Um 302 pediria para ele
+   * manter a antiga indexada, que é o oposto do que se quer numa migração.
+   */
+  async redirects() {
+    return [
+      // As 18 fichas de modelo. O slug é o mesmo dos dois lados.
+      { source: '/listings/:slug', destination: '/modelos/:slug', permanent: true },
+      { source: '/listings', destination: '/modelos', permanent: true },
+      // O hub de contatos mudou de nome.
+      { source: '/nossos-contatos', destination: '/contatos', permanent: true },
+      // O WordPress servia tudo com barra final; o Next normaliza sozinho,
+      // mas o /feed e o /comments/feed não existem aqui e devem sair do índice
+      // apontando para algo útil em vez de 404.
+      { source: '/feed', destination: '/dicas', permanent: true },
+      { source: '/comments/feed', destination: '/dicas', permanent: true },
+    ]
+  },
+
   async headers() {
     /*
      * Hosts do Google Tag Manager, GA4, Google Ads e Meta Pixel.
