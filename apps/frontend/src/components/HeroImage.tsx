@@ -1,4 +1,4 @@
-import Image from 'next/image'
+import { getImageProps } from 'next/image'
 
 /**
  * Fotografia de fundo do hero.
@@ -11,57 +11,88 @@ import Image from 'next/image'
  *  - retrato (1170x2000) no celular, onde o hero é bem mais alto que largo;
  *  - paisagem (2560x1707) a partir de `sm`.
  *
- * A troca é feita com DUAS `next/image` alternadas por CSS. O custo é uma tag
- * a mais no HTML, e só a visível é baixada — mas isso depende de NÃO haver
- * preload, e é a parte que estava errada.
+ * ## Por que `<picture>`, e não duas `next/image`
  *
- * ## Por que não há `priority` aqui
+ * O caminho óbvio — duas `<Image>` alternadas por `sm:hidden` — tem dois modos
+ * de falha, e tropeçamos nos dois:
  *
- * `priority` injeta um `<link rel="preload">` no `<head>`. O preload é
- * processado antes de qualquer layout e ignora CSS, então `sm:hidden` não o
- * alcança: as duas fotos eram baixadas em todo aparelho. Medido num Pixel 5
- * em 4G lento — retrato 77KB e paisagem 42KB, as duas, sempre.
+ * Com `priority`, o Next injeta um `<link rel="preload">` por imagem. O
+ * preload é processado antes do layout e ignora CSS, então as DUAS fotos eram
+ * baixadas em todo aparelho. Medido num Pixel 5: retrato 77KB e paisagem
+ * 42KB, sempre.
  *
- * A documentação do Next 16 desaconselha preload exatamente neste caso
- * ("quando várias imagens podem ser o elemento de LCP dependendo do
- * viewport") e recomenda `fetchPriority` no lugar. O `priority` em si está
- * deprecado desde o Next 16.
+ * Sem `priority`, o `loading="lazy"` padrão resolve o download duplo, mas a
+ * foto visível passa a ser descoberta tarde — e ela É o elemento de LCP no
+ * viewport que o Lighthouse usa. Medido: `lcp-discovery-insight` com nota
+ * zero, apontando "LCP resources should not use loading=lazy".
  *
- * Sem preload, o `loading="lazy"` padrão resolve: o navegador vê que o
- * elemento oculto nunca entra no viewport e não busca o arquivo. Não troque
- * por `loading="eager"` — isso traz o download duplo de volta.
+ * `<picture>` com `<source media>` resolve os dois: o navegador baixa só o
+ * recorte que vai exibir, e o `<img>` é ansioso, descoberto no parse. Os dois
+ * `<link rel="preload">` levam `media`, então cada aparelho preloada apenas
+ * o seu — que é o que o preload deveria ter feito desde o início.
  *
- * `fetchPriority="high"` continua: ele prioriza a imagem na fila da rede sem
- * criar preload, que é exatamente o que se quer.
+ * O React 19 iça os `<link>` para o `<head>` sozinho, então eles podem ser
+ * declarados aqui, junto do que descrevem.
+ *
+ * Um comentário antigo registrava que dentro de `<picture>` o Chrome não
+ * registrava candidato a LCP. Aquele teste é anterior a três correções que
+ * causavam `NO_LCP` na home por outros motivos (o `z-index:-30` da seção, o
+ * scroll espúrio do carrossel e o `bg-clip-text` do h1), e não se reproduz.
  *
  * Os arquivos são gerados por `audit/gerar-hero.mjs`.
  */
 const PAISAGEM = '/brand/hero-home-1920.jpg'
 const RETRATO = '/brand/hero-home-portrait-1170.jpg'
 
+/* `sm` do Tailwind. Declarado uma vez: as três ocorrências abaixo (duas no
+   preload, uma no <source>) precisam concordar, senão um aparelho preloada um
+   arquivo e exibe outro. */
+const DESKTOP = '(min-width: 640px)'
+const CELULAR = '(max-width: 639px)'
+
 export default function HeroImage({ alt = '', className = '' }: { alt?: string; className?: string }) {
+  const comum = { alt, sizes: '100vw', quality: 72 } as const
+
+  const { props: paisagem } = getImageProps({ ...comum, src: PAISAGEM, width: 2560, height: 1707 })
+  const { props: retrato } = getImageProps({ ...comum, src: RETRATO, width: 1170, height: 2000 })
+
   return (
     <div className={`absolute inset-0 overflow-hidden bg-navy-900 ${className}`}>
-      {/* Celular: recorte retrato. `sm:hidden` evita a busca do arquivo. */}
-      <Image
-        src={RETRATO}
-        alt={alt}
-        fill
+      {/* Cada preload com o seu `media`: o aparelho busca um arquivo só. */}
+      <link
+        rel="preload"
+        as="image"
+        media={CELULAR}
+        imageSrcSet={retrato.srcSet}
+        imageSizes="100vw"
         fetchPriority="high"
-        quality={72}
-        sizes="100vw"
-        className="object-cover object-[52%_center] sm:hidden"
       />
-      {/* Tablet e desktop: enquadramento paisagem. */}
-      <Image
-        src={PAISAGEM}
-        alt={alt}
-        fill
+      <link
+        rel="preload"
+        as="image"
+        media={DESKTOP}
+        imageSrcSet={paisagem.srcSet}
+        imageSizes="100vw"
         fetchPriority="high"
-        quality={72}
-        sizes="100vw"
-        className="hidden object-cover object-[68%_center] sm:block"
       />
+
+      <picture>
+        <source media={DESKTOP} srcSet={paisagem.srcSet} sizes="100vw" />
+        {/* O `<img>` carrega o retrato quando nenhum `<source>` casa, e é ele
+            que o LCP mede. `eager` de propósito: é a maior imagem acima da
+            dobra, e adiá-la é adiar a métrica.
+
+            O recorte muda com o viewport porque agora é uma tag só: 52% no
+            celular (retrato) e 68% a partir de `sm` (paisagem). */}
+        <img
+          {...retrato}
+          alt={alt}
+          loading="eager"
+          fetchPriority="high"
+          decoding="async"
+          className="absolute inset-0 h-full w-full object-cover object-[52%_center] sm:object-[68%_center]"
+        />
+      </picture>
     </div>
   )
 }
