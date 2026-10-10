@@ -50,11 +50,28 @@ const RETRATO = '/brand/hero-home-portrait-1170.jpg'
 const DESKTOP = '(min-width: 640px)'
 const CELULAR = '(max-width: 639px)'
 
-export default function HeroImage({ alt = '', className = '' }: { alt?: string; className?: string }) {
-  const comum = { alt, sizes: '100vw', quality: 72 } as const
+/*
+ * `sizes` maior que a largura da tela, de proposito.
+ *
+ * O hero usa `object-fit: cover`, e o recorte retrato (1170x2000, proporcao
+ * 0,585) e mais largo que o vao que preenche num celular (412x820, 0,502).
+ * O cover escala pela ALTURA e corta as laterais — entao a largura de arquivo
+ * necessaria e maior que a da tela.
+ *
+ * Medido num 412x820 em DPR 2: o cover precisa de 960px de largura, mas
+ * `sizes="100vw"` pedia 824. O Next servia 828 e o navegador ampliava, com
+ * perda de nitidez. Os 120vw cobrem a diferenca com folga.
+ *
+ * O paisagem nao tem esse problema (e mais largo que alto em qualquer tela),
+ * entao fica em 100vw.
+ */
+const LARGURA_RETRATO = '120vw'
 
-  const { props: paisagem } = getImageProps({ ...comum, src: PAISAGEM, width: 2560, height: 1707 })
-  const { props: retrato } = getImageProps({ ...comum, src: RETRATO, width: 1170, height: 2000 })
+export default function HeroImage({ alt = '', className = '' }: { alt?: string; className?: string }) {
+  const comum = { alt, quality: 72 } as const
+
+  const { props: paisagem } = getImageProps({ ...comum, sizes: '100vw', src: PAISAGEM, width: 2560, height: 1707 })
+  const { props: retrato } = getImageProps({ ...comum, sizes: LARGURA_RETRATO, src: RETRATO, width: 1170, height: 2000 })
 
   return (
     <div className={`absolute inset-0 overflow-hidden bg-navy-900 ${className}`}>
@@ -64,7 +81,7 @@ export default function HeroImage({ alt = '', className = '' }: { alt?: string; 
         as="image"
         media={CELULAR}
         imageSrcSet={retrato.srcSet}
-        imageSizes="100vw"
+        imageSizes={LARGURA_RETRATO}
         fetchPriority="high"
       />
       <link
