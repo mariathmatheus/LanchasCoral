@@ -37,7 +37,17 @@ export default async function BotaoZap({ locale }: { locale: Locale }) {
         `print:hidden` porque um botão flutuante impresso é só uma mancha
         verde sobre o texto.
       */
-      className="btn-press group fixed bottom-5 right-5 z-40 inline-flex h-14 w-14 items-center justify-center rounded-full bg-[#25D366] text-white shadow-[var(--shadow-md)] hover:bg-[#1FB855] print:hidden"
+      /*
+        `pointer-events-none` no halo, `auto` no botao: o alvo de toque fica
+        exatamente os 56px do circulo, e nao o quadrado que o envolve.
+
+        Sem isso, os cantos transparentes ao redor do circulo roubavam o toque
+        de quem estivesse por baixo. Medido na lista de modelos: de 1 a 3
+        botoes "Comparar" ficavam inacessiveis conforme a rolagem parasse —
+        eles vivem no canto superior direito dos cartoes, e a cada parada
+        algum deles caia sob o flutuante.
+      */
+      className="btn-press group fixed bottom-5 right-5 z-40 inline-flex h-14 w-14 items-center justify-center rounded-full bg-[#25D366] text-white shadow-[var(--shadow-md)] [clip-path:circle(50%)] hover:bg-[#1FB855] print:hidden"
     >
       {/* O rótulo só existe para leitor de tela: na tela, o glifo do WhatsApp
           já é reconhecido sem texto ao lado. */}

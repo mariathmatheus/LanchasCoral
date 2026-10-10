@@ -78,6 +78,30 @@ const DETECTOR = () => {
     if (cs.visibility === 'hidden' || cs.display === 'none') continue
     if (el.closest('[aria-hidden="true"]')) continue
 
+    /* O elemento esta mesmo na tela, ou e a copia de outro ponto de quebra?
+    
+       O site renderiza alguns controles duas vezes — um arranjo para o
+       celular, outro para o desktop — e esconde um dos dois por CSS. A copia
+       escondida continua tendo retangulo, e media como se estivesse la.
+    
+       `elementFromPoint` no proprio centro responde: se devolve outra coisa
+       que NAO o contem, este elemento nao esta pintado ali. Medido: era o que
+       fazia o "Limpar filtros" do Broker aparecer como roubado por um cartao
+       de anuncio — os dois ocupavam as mesmas coordenadas, e o visivel era o
+       cartao. */
+    if (b.top >= 0 && b.bottom <= alturaVis) {
+      const noCentro = document.elementFromPoint(
+        Math.round(b.left + b.width / 2),
+        Math.round(b.top + b.height / 2),
+      )
+      if (noCentro && noCentro !== el && !el.contains(noCentro) && !noCentro.contains(el)) {
+        // Nao esta pintado aqui: so avalia se e um flutuante roubando o toque.
+        const pos = getComputedStyle(noCentro).position
+        const flutua = pos === 'fixed' || !!noCentro.closest('[data-zap],[role="dialog"]')
+        if (!flutua) continue
+      }
+    }
+
     if ((b.right > tela + 1 || b.left < -1) && !temRolagemPropria(el)) {
       achados.push({ tipo: 'FORA', detalhe: descreve(el), onde: `${Math.round(b.left)}..${Math.round(b.right)} (tela ${tela})` })
     }
