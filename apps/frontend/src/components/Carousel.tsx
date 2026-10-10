@@ -93,8 +93,20 @@ export default function Carousel({
       </div>
 
       {pages > 1 && (
-        <div className="mt-8 flex items-center justify-between gap-6">
-          <div className="flex items-center gap-2" role="tablist" aria-label={label}>
+        <div className="mt-8 flex items-center justify-between gap-3 sm:gap-6">
+          {/* `min-w-0` + `overflow-hidden`: com muitas paginas, os pontos
+              somavam mais largura que a tela e empurravam as setas para fora
+              do viewport. Medido num aparelho de 393px com 6 modelos: o botao
+              "Proximo" comecava em 402px, inteiramente invisivel.
+
+              Agora o grupo de pontos encolhe e, se ainda assim nao couber,
+              corta — as setas, que sao o controle principal, ficam sempre
+              visiveis. `shrink-0` nelas garante isso. */}
+          <div
+            className="flex min-w-0 items-center gap-2 overflow-hidden"
+            role="tablist"
+            aria-label={label}
+          >
             {Array.from({ length: pages }, (_, i) => (
               <button
                 key={i}
@@ -120,7 +132,7 @@ export default function Carousel({
             ))}
           </div>
 
-          <div className="flex gap-2.5">
+          <div className="flex shrink-0 gap-2.5">
             <button
               type="button"
               onClick={() => go(-1)}

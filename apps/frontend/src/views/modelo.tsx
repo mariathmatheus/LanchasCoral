@@ -89,12 +89,26 @@ export default async function BoatView({ slug, locale }: { slug: string; locale:
       />
 
       {/* ================= HERO ================= */}
-      <section className="relative isolate -mt-[var(--header-h)] flex min-h-[560px] flex-col justify-end overflow-hidden bg-navy-900 pt-[var(--header-h)] lg:min-h-[min(78vh,720px)]">
+      {/* `min-h-[440px]` no celular, e nao 560: as fotografias de hero sao
+          largas (proporcao media 1,64 nas 18 do catalogo) e a area era alta
+          (393x560 = 0,70). Para preencher, o `cover` ampliava a imagem em
+          2,3x e cortava as duas pontas da lancha — a proa saia pela esquerda,
+          a popa pela direita, e nao se via a embarcacao inteira, que e
+          exatamente o que a pagina existe para mostrar.
+
+          440px da proporcao 0,89, bem mais perto das fotos, e continua
+          cabendo trilha, titulo e os dois botoes. O desktop fica como estava:
+          la a area ja e larga e o corte nao acontece. */}
+      <section className="relative isolate -mt-[var(--header-h)] flex min-h-[440px] flex-col justify-end overflow-hidden bg-navy-900 pt-[var(--header-h)] sm:min-h-[560px] lg:min-h-[min(78vh,720px)]">
         {/* A imagem fica, e é ela que o Lighthouse mede como LCP. O vídeo
             entra por cima só depois de carregado — e não entra em quem pediu
             menos movimento ou está em conexão limitada. */}
         {heroImage && (
-          <Image src={heroImage} alt={label} fill priority sizes="100vw" className="-z-30 object-cover" />
+          /* `object-[50%_60%]`: as lanchas aparecem na metade de baixo das
+             fotografias (o ceu ocupa o topo). Ancorar o recorte um pouco
+             abaixo do centro mantem o barco enquadrado quando a area e mais
+             alta que a foto. */
+          <Image src={heroImage} alt={label} fill priority sizes="100vw" className="-z-30 object-cover object-[50%_60%]" />
         )}
         {boat.heroVideo && <HeroVideo src={boat.heroVideo} />}
         <div aria-hidden className="absolute inset-0 -z-20" style={{ background: 'var(--scrim-hero)' }} />

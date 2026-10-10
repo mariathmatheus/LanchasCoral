@@ -214,6 +214,30 @@ html {
   scroll-behavior: smooth;
 }
 
+/*
+ * Nada rola para o lado.
+ *
+ * Um unico elemento que ultrapasse a largura da tela por poucos pixels faz a
+ * pagina inteira arrastar horizontalmente — e no celular isso da a sensacao de
+ * site quebrado, porque o conteudo "escorrega" sob o dedo a cada toque.
+ *
+ * Medido: em telas de 320px o botao do menu transbordava 6px, por causa da
+ * margem negativa que amplia o alvo de toque. Foi corrigido na origem, mas a
+ * regra fica como rede de protecao: o proximo elemento que escapar por um
+ * descuido de margem nao vai derrubar a navegacao de ninguem.
+ *
+ * `overflow-x: clip` e nao `hidden`: o `hidden` criaria um contexto de rolagem
+ * que quebra `position: sticky` nos filhos — o cabecalho deixaria de grudar no
+ * topo. O `clip` so corta, sem criar contexto.
+ *
+ * Nao afeta rolagem horizontal INTENCIONAL (o carrossel, as tabelas da
+ * comparacao): esses tem o proprio `overflow-x: auto` e continuam rolando.
+ */
+html,
+body {
+  overflow-x: clip;
+}
+
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   *, *::before, *::after {
