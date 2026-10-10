@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { getDict } from '@/i18n/dictionary'
 import type { Locale } from '@/i18n/config'
 
@@ -108,6 +108,7 @@ type Fase = 'oculto' | 'montado' | 'visivel'
 
 export default function Consentimento({ locale = 'pt' }: { locale?: Locale }) {
   const [fase, setFase] = useState<Fase>('oculto')
+  const caixa = useRef<HTMLDivElement>(null)
   const t = getDict(locale).cookies
 
   useEffect(() => {
@@ -147,6 +148,38 @@ export default function Consentimento({ locale = 'pt' }: { locale?: Locale }) {
     }
   }, [])
 
+  /*
+   * Publica a altura do banner numa variavel CSS.
+   *
+   * O botao flutuante do WhatsApp precisa subir enquanto o banner ocupa o
+   * rodape, senao fica coberto — e o toque nele acionava o "Aceitar" que
+   * estava por baixo, o que e consentimento obtido por engano.
+   *
+   * O recuo nao pode ser um numero fixo: o banner mede de 221px a 265px
+   * conforme a largura, porque o texto reflui. Medir aqui faz o recuo
+   * acompanhar, inclusive se a politica mudar de tamanho.
+   *
+   * O ResizeObserver cobre a rotacao da tela e a mudanca de fonte.
+   */
+  useEffect(() => {
+    const el = caixa.current
+    const raiz = document.documentElement
+    if (fase === 'oculto' || !el) {
+      raiz.style.removeProperty('--altura-consentimento')
+      return
+    }
+    const medir = () => {
+      raiz.style.setProperty('--altura-consentimento', `${Math.ceil(el.getBoundingClientRect().height)}px`)
+    }
+    medir()
+    const ro = new ResizeObserver(medir)
+    ro.observe(el)
+    return () => {
+      ro.disconnect()
+      raiz.style.removeProperty('--altura-consentimento')
+    }
+  }, [fase])
+
   const decidir = (estatisticas: boolean, marketing: boolean) => {
     const escolha: Escolha = {
       estatisticas,
@@ -175,6 +208,7 @@ export default function Consentimento({ locale = 'pt' }: { locale?: Locale }) {
       /* Marcador para o CSS: enquanto o banner ocupa o rodape, o botao
          flutuante do WhatsApp precisa subir. Ver globals.css. */
       data-consentimento
+      ref={caixa}
       /* `z-[130]`: acima dos diálogos (z-120), porque a escolha precede
          qualquer outra interação. Ancorado embaixo para não cobrir o conteúdo
          que a pessoa veio ler.

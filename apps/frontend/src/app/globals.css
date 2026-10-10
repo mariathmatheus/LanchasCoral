@@ -327,11 +327,16 @@ body {
  * era consentimento obtido por engano de quem so queria falar com o estaleiro,
  * o oposto do que o Art. 8o da LGPD pede.
  *
- * O banner tem altura variavel (o texto reflui conforme a largura), entao o
- * recuo e generoso: 11rem cobre as tres linhas do pior caso em 320px.
+ * O recuo NAO e um numero fixo: o banner mede de 221px a 265px conforme a
+ * largura da tela, porque o texto reflui. Uma primeira tentativa com 11rem
+ * (176px) nao bastou em nenhuma largura.
+ *
+ * A altura real e publicada pelo proprio banner em `--altura-consentimento`
+ * (ver Consentimento.tsx), e o botao se apoia nela mais um respiro de 20px.
+ * Assim o recuo acompanha o texto, inclusive se a politica mudar de tamanho.
  */
 body:has([data-consentimento]) [data-zap] {
-  bottom: 11rem;
+  bottom: calc(var(--altura-consentimento, 17rem) + 1.25rem);
 }
 
 body:has([data-zap]) .nr-badge {
