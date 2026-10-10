@@ -1,0 +1,175 @@
+# Verifica e publica o site da Coral.
+#
+# ## Por que o build NÃO acontece aqui
+#
+# Seis rotas pré-renderizam conteúdo do banco (`generateStaticParams`), então
+# `next build` precisa falar com o Postgres — que vive no servidor e não é
+# exposto à internet. Dar ao runner uma cópia do banco de produção seria
+# espalhar dados de clientes por uma máquina efêmera de terceiro.
+#
+# Então a divisão é esta: o runner roda tudo que é puro (typecheck, lint,
+# testes) e o servidor constrói a imagem contra o banco real. Se a verificação
+# falha, nada chega ao servidor.
+#
+# ## Como o deploy chega lá
+#
+# O site roda atrás de um túnel Cloudflare, sem porta HTTP aberta. O caminho é
+# SSH: o runner conecta, atualiza o repositório e sobe a pilha. Exige que a
+# porta 22 aceite os IPs do GitHub — veja infra/README.md.
+
+name: Verificar e publicar
+
+on:
+  push:
+    branches: [main]
+  # Permite disparar à mão pela aba Actions, útil para republicar sem commit.
+  workflow_dispatch:
+
+# Dois pushes seguidos não devem construir ao mesmo tempo no servidor: o
+# segundo cancela o primeiro, e vence o commit mais novo.
+concurrency:
+  group: publicar-producao
+  cancel-in-progress: true
+
+jobs:
+  verificar:
+    name: Typecheck, lint e testes
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: apps/frontend/package-lock.json
+
+      # `npm ci` e não `npm install`: respeita o lockfile à risca, então o que
+      # é testado aqui é exatamente o que vai para o servidor.
+      - name: Instalar dependências
+        working-directory: apps/frontend
+        run: npm ci
+
+      # O cliente do Prisma é gerado a partir do schema e não vai no git; sem
+      # isto o typecheck não encontra os tipos das tabelas.
+      - name: Gerar cliente do Prisma
+        working-directory: apps/frontend
+        run: npx prisma generate
+
+      # `npm run verificar` = tsc --noEmit + tsc dos testes + eslint + vitest.
+      # Nenhum deles toca o banco: a URL abaixo existe só porque o Prisma
+      # recusa inicializar sem ela, e nunca chega a conectar.
+      - name: Verificar
+        working-directory: apps/frontend
+        env:
+          DATABASE_URL: postgresql://ci:ci@127.0.0.1:5432/ci?schema=public
+        run: npm run verificar
+
+  publicar:
+    name: Publicar no servidor
+    needs: verificar
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    # Amarra o job ao Environment "producao", onde ficam os segredos e onde dá
+    # para exigir aprovação manual depois, se o fluxo mudar.
+    environment:
+      name: producao
+      url: https://coral.nerdresolve.com
+
+    steps:
+      - name: Conectar e publicar
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.SSH_PORT || 22 }}
+          # O build da imagem é o passo longo; 25 min cobre uma máquina lenta
+          # sem deixar um job travado ocupar o runner indefinidamente.
+          command_timeout: 25m
+          script: |
+            set -euo pipefail
+            cd ${{ secrets.DEPLOY_PATH }}
+
+            echo "::group::Atualizando o código"
+            git fetch --prune origin main
+            # `reset --hard` e não `pull`: a árvore do servidor é um espelho da
+            # main, não um lugar onde se edita. Um arquivo mexido à mão ali
+            # faria o pull parar com conflito no meio de um deploy.
+            git reset --hard origin/main
+            git log -1 --pretty='%h %s'
+            echo "::endgroup::"
+
+            echo "::group::Migrações do banco"
+            # Antes da imagem nova subir: código novo contra schema velho
+            # quebra, o contrário costuma sobreviver.
+            #
+            # Roda a partir do código-fonte, e não de dentro do contêiner: a
+            # imagem standalone leva o schema mas NÃO o Prisma CLI, então
+            # `npx prisma` ali dentro falharia. O DATABASE_URL vem de
+            # apps/frontend/.env, que aponta para o 127.0.0.1:5433 publicado
+            # pelo compose.
+            #
+            # `migrate deploy` só aplica o que existe em prisma/migrations —
+            # nunca gera nem reseta, ao contrário de `migrate dev`, que chega a
+            # propor derrubar o banco quando encontra desvio de schema.
+            (
+              cd apps/frontend
+              node --env-file=.env ./node_modules/prisma/build/index.js migrate deploy
+            )
+            echo "::endgroup::"
+
+            echo "::group::Construindo e subindo"
+            docker compose --env-file .env -f infra/docker-compose.yml up -d --build
+            echo "::endgroup::"
+
+            echo "::group::Esperando ficar saudável"
+            # O compose devolve o controle quando o contêiner inicia, não
+            # quando o site responde. Sem esta espera, a verificação seguinte
+            # mediria a aplicação ainda subindo.
+            for i in $(seq 1 30); do
+              estado=$(docker inspect -f '{{.State.Health.Status}}' coral-app 2>/dev/null || echo partiu)
+              [ "$estado" = "healthy" ] && { echo "saudável em ${i}0s"; break; }
+              [ "$i" = "30" ] && { echo "NÃO ficou saudável"; docker logs --tail 40 coral-app; exit 1; }
+              sleep 10
+            done
+            echo "::endgroup::"
+
+            # Imagens órfãs das versões anteriores enchem o disco e, num
+            # servidor pequeno, derrubam o próximo deploy por falta de espaço.
+            docker image prune -f --filter "until=168h" >/dev/null 2>&1 || true
+
+  conferir:
+    name: Conferir no ar
+    needs: publicar
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      # Confere o que só se vê de fora: o site responde, os cabeçalhos de
+      # segurança continuam lá e o painel segue fechado. Um deploy que passa
+      # nos testes e derruba qualquer um destes ainda é um deploy ruim.
+      - name: Site no ar e protegido
+        run: |
+          set -euo pipefail
+          BASE=https://coral.nerdresolve.com
+
+          for rota in / /modelos /broker /contato /en; do
+            codigo=$(curl -fsS -o /dev/null -w '%{http_code}' --max-time 30 "$BASE$rota")
+            [ "$codigo" = "200" ] || { echo "::error::$rota devolveu $codigo"; exit 1; }
+            echo "ok  $rota"
+          done
+
+          cabecalhos=$(curl -fsS -D - -o /dev/null --max-time 30 "$BASE/" | tr -d '\r' | tr 'A-Z' 'a-z')
+          for h in content-security-policy strict-transport-security x-frame-options x-content-type-options; do
+            echo "$cabecalhos" | grep -q "^$h:" || { echo "::error::cabeçalho ausente: $h"; exit 1; }
+            echo "ok  $h"
+          done
+
+          # O painel não pode ficar aberto por um deploy. 307 é o redirecionamento
+          # para o login; 200 aqui seria vazamento.
+          admin=$(curl -fsS -o /dev/null -w '%{http_code}' --max-time 30 "$BASE/admin/listings" || true)
+          [ "$admin" = "307" ] || [ "$admin" = "302" ] || { echo "::error::/admin devolveu $admin"; exit 1; }
+          echo "ok  painel protegido ($admin)"
