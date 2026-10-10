@@ -128,7 +128,15 @@ import { href, type Locale } from '@/i18n/config'
           </div>
         ))}
 
-        <div className="flex gap-2">
+        {/* `relative z-50`: a linha fica no fim do painel de filtros, no canto
+            direito — exatamente onde o botao flutuante do WhatsApp (z-40)
+            mora. Medido em 320, 390 e 430px: o toque no "Limpar filtros" ia
+            inteiro para o WhatsApp, e quem filtrava e queria desfazer acabava
+            numa conversa.
+
+            Acima de z-40 e abaixo do cabecalho (z-50 tambem, mas em outra
+            pilha) e dos dialogos (z-110+), entao nada mais muda. */}
+        <div className="relative z-50 flex gap-2">
           <SubmitButton size="sm" className="h-11 flex-1">
             {t.apply}
           </SubmitButton>
