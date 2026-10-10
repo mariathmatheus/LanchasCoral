@@ -160,10 +160,17 @@ export default async function SiteFooter({ locale = 'pt' }: { locale?: Locale } 
               encontrarem — e depender dessa folga seria deixar o defeito de
               pe na metade dos monitores.
 
-              64px e a conta do badge: 44px de alvo de toque mais os 16px que o
-              separam da borda, com 4px de respiro. Com 56px o centro do botao
-              ja escapava, mas a borda direita ainda encostava. */}
-          <span className="flex flex-wrap items-center gap-x-2 pr-16">
+              A calha de 64px resolve a maioria dos casos, mas nao todos: o
+              badge nem sempre esta no canto — quando o botao do WhatsApp
+              existe, ele recua para `right: 80px` (ver globals.css) e volta a
+              cruzar a linha. Uma calha de 124px daria conta, e desfiguraria o
+              rodape no celular.
+
+              Daí o `relative z-10`: a linha de links vence o badge no
+              empilhamento. O badge e assinatura decorativa; o botao de
+              preferencias e via de revogacao exigida por lei. Quando os dois
+              disputam o mesmo pixel, quem recebe o toque e o segundo. */}
+          <span className="relative z-10 flex flex-wrap items-center gap-x-2 pr-16">
             <Link prefetch={false} href={href('privacidade', locale)} className="inline-flex min-h-11 items-center transition-colors hover:text-pearl-0">
               {t.footer.privacy}
             </Link>
