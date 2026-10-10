@@ -9,17 +9,27 @@
 # hora da conta. Medido: a primeira subida com o domínio declarado queimou
 # algumas tentativas assim.
 #
-# ## Por que há HTTPS, mesmo sem domínio
+# ## Acessar pelo IP mostra o site SEM ESTILO. É esperado.
 #
 # A CSP da aplicação manda `upgrade-insecure-requests`, que faz o navegador
-# reescrever todo `http://` para `https://`. Servindo o IP só em HTTP, o CSS e
-# as fontes eram pedidos num HTTPS que não existia e o navegador os bloqueava:
-# o site aparecia como HTML cru, sem estilo nenhum. Medido no navegador.
+# reescrever todo `http://` para `https://`. Como não há HTTPS neste endereço,
+# o CSS e as fontes são bloqueados e sobra o HTML cru.
 #
-# O `tls internal` resolve com um certificado assinado pela autoridade local do
-# próprio Caddy. O navegador mostra aviso de certificado não confiável — é
-# esperado e aceita-se uma vez — mas a partir daí o site carrega inteiro, e dá
-# para conferir o produto de verdade antes de mexer no DNS.
+# Não é defeito do site, é a CSP funcionando: com o domínio e TLS, o mesmo
+# cabeçalho é o que impede conteúdo misto. Enfraquecer a CSP para melhorar a
+# aparência de um endereço temporário seria trocar segurança permanente por
+# conveniência de alguns dias.
+#
+# `tls internal` foi tentado e NÃO resolve: o Caddy emite o certificado para o
+# IP ("certificate obtained successfully, issuer: local") mas não o apresenta
+# no handshake — a conexão morre com "tlsv1 alert internal error". Medido de
+# dentro do próprio servidor, então não é peculiaridade de cliente.
+#
+# Para CONFERIR O SITE enquanto o DNS não vira, use o endereço de teste:
+# https://coral.nerdresolve.com — é o mesmo contêiner, com HTTPS de verdade.
+# Este bloco aqui existe só para o site já responder no IP, provando que o
+# caminho da porta 80 está aberto para o desafio do Let's Encrypt no dia da
+# virada.
 #
 # ## A virada
 #
@@ -28,20 +38,14 @@
 #   2. `dig +short lanchascoral.com.br` devolvendo o IP.
 #   3. `cp infra/Caddyfile.dominio infra/Caddyfile` e commit.
 #   4. O deploy recria o proxy, que emite o certificado no primeiro acesso.
-# Sem bloco global de ACME aqui de propósito: o `acme_ca` vira política padrão
-# para todos os sites e entra em conflito com o `tls internal` de um bloco sem
-# nome de host — o Caddy recusa a configuração inteira. Nada neste arquivo pede
-# certificado público, então não há o que configurar. O emissor fixo está no
-# `Caddyfile.dominio`, que é onde ele passa a valer.
 
-# Sem nome de host: atende qualquer endereço, inclusive o IP cru. O Caddy não
-# pede certificado a autoridade nenhuma para um site assim.
-:80, :443 {
-	# Certificado assinado pela autoridade interna do Caddy. Não serve para o
-	# público — serve para o site se comportar como vai se comportar em
-	# produção, com a CSP valendo.
-	tls internal
+# Sem bloco global de ACME: nada aqui pede certificado público, e o `acme_ca`
+# vira política padrão de todos os sites, conflitando com blocos sem nome de
+# host. O emissor fixo está no `Caddyfile.dominio`, onde passa a valer.
 
+# `:80` sem nome de host atende qualquer endereço, inclusive o IP cru, e não
+# dispara emissão de certificado nenhuma.
+:80 {
 	reverse_proxy app:3000 {
 		# O IP real de quem acessa. Sem isto, o teto de envios por IP do
 		# formulário veria todos os visitantes como o mesmo endereço (o do
