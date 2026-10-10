@@ -29,11 +29,29 @@ const montserrat = Montserrat({
   display: 'swap',
 })
 
+/*
+ * `optional`, e nao `swap`, por causa do que esta fonte realmente desenha.
+ *
+ * O JetBrains Mono aparece em unidades ("m", "hp") e numeracao ("01".."04"),
+ * sempre em corpo pequeno. Sao poucos glifos — e custavam 31KB baixados com
+ * prioridade alta, disputando banda com a imagem do hero.
+ *
+ * Com `optional` o Next nao emite `<link rel="preload">`: a fonte sai da fila
+ * critica e, se nao chegar a tempo, o texto fica na monoespaçada do sistema
+ * (o fallback de `--font-mono` em globals.css). Sem troca depois, entao
+ * tambem nao ha reflow.
+ *
+ * Medido em 4G lento, duas rodadas: FCP e LCP caem cerca de 120ms e 28KB
+ * saem do carregamento.
+ *
+ * O Montserrat segue em `swap` e com preload: ele desenha o <h1> do hero e o
+ * corpo do texto, onde a troca de fonte seria visivel e o peso se justifica.
+ */
 const jetbrains = JetBrains_Mono({
   subsets: ['latin'],
   weight: ['400', '500'],
   variable: '--font-jetbrains',
-  display: 'swap',
+  display: 'optional',
 })
 
 export const fontVars = `${montserrat.variable} ${jetbrains.variable}`
