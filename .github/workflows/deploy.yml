@@ -76,7 +76,7 @@ jobs:
     # para exigir aprovação manual depois, se o fluxo mudar.
     environment:
       name: producao
-      url: https://coral.nerdresolve.com
+      url: ${{ vars.SITE_URL || 'https://coral.nerdresolve.com' }}
 
     steps:
       - name: Conectar e publicar
@@ -193,7 +193,12 @@ jobs:
       - name: Site no ar e protegido
         run: |
           set -euo pipefail
-          BASE=https://coral.nerdresolve.com
+          # Enquanto o DNS não virar, o site é servido pelo endereço de
+          # teste; depois passa a ser lanchascoral.com.br. Em vez de editar o
+          # workflow no dia da virada, o endereço vem de uma variável do
+          # repositório (Settings → Secrets and variables → Actions → Variables).
+          # Sem ela, cai no endereço de teste, que é o estado de hoje.
+          BASE=${{ vars.SITE_URL || 'https://coral.nerdresolve.com' }}
 
           for rota in / /modelos /broker /contato /en; do
             codigo=$(curl -fsS -o /dev/null -w '%{http_code}' --max-time 30 "$BASE$rota")
