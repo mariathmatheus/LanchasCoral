@@ -158,8 +158,12 @@ export default async function SiteFooter({ locale = 'pt' }: { locale?: Locale } 
               640 e 900px o centro do botao tambem devolvia o badge. So a partir
               de ~1280px a linha fica larga o bastante para os dois nao se
               encontrarem — e depender dessa folga seria deixar o defeito de
-              pe na metade dos monitores. */}
-          <span className="flex flex-wrap items-center gap-x-2 pr-14">
+              pe na metade dos monitores.
+
+              64px e a conta do badge: 44px de alvo de toque mais os 16px que o
+              separam da borda, com 4px de respiro. Com 56px o centro do botao
+              ja escapava, mas a borda direita ainda encostava. */}
+          <span className="flex flex-wrap items-center gap-x-2 pr-16">
             <Link prefetch={false} href={href('privacidade', locale)} className="inline-flex min-h-11 items-center transition-colors hover:text-pearl-0">
               {t.footer.privacy}
             </Link>
