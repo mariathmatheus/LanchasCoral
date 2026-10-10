@@ -1,24 +1,29 @@
-# Porta de entrada do site.
+# Porta de entrada do site, ANTES da virada de domínio.
 #
-# O Caddy termina o TLS e repassa para a aplicação pela rede interna do
-# compose. Substitui o túnel Cloudflare como caminho definitivo: o túnel vive
-# numa conta de terceiro — a da agência, não a da Coral — e a entrega de um
-# site não deve depender da infraestrutura de quem o construiu.
+# Serve pelo IP, em HTTP, sem pedir certificado. É de propósito: o Caddy pede o
+# certificado assim que sobe, e o Let's Encrypt valida indo buscar um arquivo
+# em http://<domínio>/.well-known/. Enquanto `lanchascoral.com.br` apontar para
+# a Cloudflare (onde o WordPress ainda está), a validação volta 403 — e cada
+# falha conta contra o teto de 5 por hora da conta. Medido: a primeira subida
+# com o domínio declarado queimou algumas tentativas assim.
 #
-# O certificado é emitido e renovado sozinho pelo Let's Encrypt, sem cron nem
-# passo manual. É o motivo de escolher Caddy em vez de Nginx aqui: num servidor
-# que ninguém vai administrar no dia a dia, um certificado que expira é o site
-# fora do ar. A validação é pelo desafio HTTP, então a porta 80 precisa
-# continuar aberta mesmo depois que todo o tráfego migrar para HTTPS.
+# No dia da virada, a sequência é:
+#
+#   1. Registro A de lanchascoral.com.br e www → 216.128.171.143,
+#      com a nuvem da Cloudflare CINZA (laranja intercepta o desafio).
+#   2. `dig +short lanchascoral.com.br` devolvendo o IP.
+#   3. `cp infra/Caddyfile.dominio infra/Caddyfile` e commit.
+#   4. O deploy sobe o Caddy, que emite o certificado no primeiro acesso.
+#
+# A configuração final, com domínio e TLS, está em `Caddyfile.dominio`.
 {
-	# Para onde o Let's Encrypt avisa de certificado perto de expirar — o único
-	# aviso que chega antes de o site cair.
 	email contato@lanchascoral.com.br
+	acme_ca https://acme-v02.api.letsencrypt.org/directory
 }
 
-lanchascoral.com.br {
-	# `app` é o nome do serviço no compose; o Docker resolve pela rede interna.
-	# A aplicação continua sem publicar porta no host — só o Caddy a alcança.
+# `:80` sem nome de host: atende qualquer endereço, inclusive o IP cru, e não
+# dispara emissão de certificado nenhuma.
+:80 {
 	reverse_proxy app:3000 {
 		# O IP real de quem acessa. Sem isto, o teto de envios por IP do
 		# formulário veria todos os visitantes como o mesmo endereço (o do
@@ -26,14 +31,7 @@ lanchascoral.com.br {
 		header_up X-Real-IP {remote_host}
 	}
 
-	# Compressão. O Next já serve o estático comprimido, mas o HTML renderizado
-	# no servidor sai cru — e é o que chega primeiro em toda navegação.
 	encode zstd gzip
-
-	# Os cabeçalhos de segurança (CSP, HSTS, X-Frame-Options) são definidos pelo
-	# Next, em `next.config.ts`, que é onde a CSP pode ser lida e testada junto
-	# do código que ela restringe. Repetir aqui criaria duas fontes de verdade
-	# que divergem na primeira alteração; o Caddy apenas não os remove.
 
 	log {
 		output file /var/log/caddy/acesso.log {
@@ -42,11 +40,4 @@ lanchascoral.com.br {
 		}
 		format json
 	}
-}
-
-# Dois endereços servindo o mesmo conteúdo são dois sites para o Google, que
-# divide a autoridade entre eles. O canonical das páginas já aponta para o
-# apex; o 301 torna a regra válida para quem digita o www à mão.
-www.lanchascoral.com.br {
-	redir https://lanchascoral.com.br{uri} permanent
 }

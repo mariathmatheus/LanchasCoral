@@ -140,11 +140,28 @@ sem cron nem passo manual. Num servidor que ninguém vai administrar no dia a
 dia, certificado expirado é o site fora do ar — e é o modo de falha mais
 provável de um Nginx configurado à mão.
 
-A configuração está em [`infra/Caddyfile`](Caddyfile). Para conferir antes de
-subir:
+São **dois** arquivos de configuração, e a razão importa:
+
+| Arquivo | Serve | Quando |
+|---|---|---|
+| [`Caddyfile`](Caddyfile) | o IP, em HTTP, sem certificado | hoje |
+| [`Caddyfile.dominio`](Caddyfile.dominio) | `lanchascoral.com.br`, com TLS | depois da virada de DNS |
+
+O ativo não declara domínio de propósito. O Caddy pede o certificado assim que
+sobe, e o Let's Encrypt valida indo buscar um arquivo em
+`http://<domínio>/.well-known/`. Enquanto o domínio apontar para a Cloudflare
+(onde o WordPress ainda está), a validação volta **403** — e cada falha conta
+contra o teto de 5 por hora da conta. Medido: a primeira subida com o domínio
+declarado queimou algumas tentativas exatamente assim.
+
+O emissor está fixado no Let's Encrypt (`acme_ca`). Sem isso o Caddy cai no
+ZeroSSL sozinho quando o Let's Encrypt falha — e o site passaria a depender de
+um emissor que ninguém escolheu nem acompanha.
+
+Para conferir qualquer um dos dois antes de subir:
 
 ```bash
-docker run --rm -v "$PWD/infra/Caddyfile:/etc/caddy/Caddyfile:ro"   caddy:2-alpine caddy validate --config /etc/caddy/Caddyfile
+docker run --rm -v "$PWD/infra:/w" caddy:2-alpine caddy validate --config /w/Caddyfile
 ```
 
 ### Abrir as portas no firewalld
@@ -160,20 +177,40 @@ A 80 **não** é opcional, nem depois da primeira emissão: o Let's Encrypt vali
 o domínio por HTTP e a renovação, a cada 60 dias, usa o mesmo caminho. Fechá-la
 faria o certificado expirar em silêncio dois meses depois.
 
+### Tirar o OpenLiteSpeed do caminho
+
+A imagem do VPS vem com OpenLiteSpeed (`lshttpd`) instalado e habilitado no
+boot. Ele não serve nada deste projeto — o site roda em Docker — mas deixava o
+painel administrativo aberto na porta 7080, **rodando PHP 5.6.40**, sem
+correção de segurança desde dezembro de 2018. A 8088 era o site de exemplo.
+
+Além do risco, é um servidor web que disputaria as portas 80/443 com o Caddy se
+fosse reconfigurado ou atualizado.
+
+```bash
+systemctl disable --now lshttpd
+ss -tlnp | grep -E '7080|8088'     # não deve devolver nada
+```
+
 ### Ordem da virada de domínio
 
 O certificado só é emitido depois que o DNS já aponta para cá — o Let's
 Encrypt precisa alcançar a porta 80 neste IP para validar. Então:
 
-1. Caddy no ar com as portas abertas (`curl -I http://216.128.171.143` responde,
-   mesmo que com erro de host desconhecido).
+1. Caddy no ar com as portas abertas: `curl -I http://216.128.171.143`
+   devolvendo 200.
 2. Registro A de `lanchascoral.com.br` e `www` → `216.128.171.143`, **sem**
    proxy da Cloudflare (nuvem cinza). Com a nuvem laranja, a Cloudflare
    intercepta o desafio e a emissão falha.
-3. Esperar o DNS propagar (`dig +short lanchascoral.com.br`).
-4. O primeiro acesso HTTPS dispara a emissão; leva poucos segundos.
+3. Esperar o DNS propagar: `dig +short lanchascoral.com.br` devolvendo o IP.
+4. Trocar a configuração e publicar:
+   ```bash
+   cp infra/Caddyfile.dominio infra/Caddyfile
+   git commit -am "Serve o dominio oficial com TLS" && git push
+   ```
+5. O primeiro acesso HTTPS dispara a emissão; leva poucos segundos.
    `docker logs coral-proxy` mostra o resultado.
-5. Trocar `vars.SITE_URL` no GitHub para `https://lanchascoral.com.br`, para o
+6. Trocar `vars.SITE_URL` no GitHub para `https://lanchascoral.com.br`, para o
    job de conferência passar a medir o endereço definitivo.
 
 O túnel Cloudflare continua de pé pelo endereço de teste
