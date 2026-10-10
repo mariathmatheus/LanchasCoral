@@ -14,9 +14,25 @@ import path from 'node:path'
 import crypto from 'node:crypto'
 
 const RAIZ = path.resolve(import.meta.dirname, '..')
-const DOMINIO = 'coral.nerdresolve.com'
-const ZONA_NOME = 'nerdresolve.com'
-const TUNEL_NOME = 'coral'
+
+/*
+ * O endereço público do site.
+ *
+ * Vem do ambiente para que a virada para o domínio oficial não exija editar
+ * este arquivo — e para que rodar o script por engano não recrie a rota
+ * antiga por cima da nova. O padrão continua sendo o endereço de teste, que é
+ * o que serve o site hoje.
+ *
+ *   DOMINIO=lanchascoral.com.br ZONA=lanchascoral.com.br node infra/cloudflare-setup.mjs
+ *
+ * ATENÇÃO na virada: o túnel precisa ter rota para o domínio novo ANTES de o
+ * DNS apontar para cá. Medido: hoje `lanchascoral.com.br` ainda responde pelo
+ * WordPress (PHP 7.4) e o túnel devolve 403 para esse Host — ou seja, apontar
+ * o DNS sem criar a rota deixaria o site fora do ar.
+ */
+const DOMINIO = process.env.DOMINIO ?? 'coral.nerdresolve.com'
+const ZONA_NOME = process.env.ZONA ?? 'nerdresolve.com'
+const TUNEL_NOME = process.env.TUNEL ?? 'coral'
 
 /** Lê o .env sem depender de biblioteca: o arquivo é simples. */
 function lerEnv(arquivo) {
