@@ -85,8 +85,15 @@ nas origens antigas — hoje, só parte delas.
 
 ```bash
 cd ~/coral/apps/frontend && npm ci && npx prisma generate
-cd ~/coral && docker compose --env-file .env -f infra/docker-compose.yml up -d --build
+cd ~/coral && docker compose --env-file .env -f infra/docker-compose.yml up -d --build --allow=network.host
 ```
+
+O `--allow=network.host` é exigência do Docker 29 em diante: o build precisa
+alcançar o Postgres em `127.0.0.1:5433`, porque seis rotas pré-renderizam
+conteúdo do banco, e versões novas pedem que esse acesso seja autorizado de
+forma explícita em vez de herdado do compose. Sem a flag o build para com
+`additional privileges requested`. Em Docker 28 ou anterior a flag não existe
+e nem é necessária.
 
 Restaure o banco a partir do backup (`infra/backup.mjs --listar` mostra as
 cópias) antes de considerar o site pronto: subir do zero dá estrutura com banco

@@ -122,7 +122,12 @@ jobs:
             echo "::endgroup::"
 
             echo "::group::Construindo e subindo"
-            docker compose --env-file .env -f infra/docker-compose.yml up -d --build
+            # `--allow=network.host`: o build precisa falar com o Postgres em
+            # 127.0.0.1:5433 (seis rotas pré-renderizam conteúdo do banco), e o
+            # Docker 29 passou a exigir que esse acesso seja autorizado de
+            # forma explícita em vez de herdado do compose. Sem a flag o build
+            # para com "additional privileges requested".
+            docker compose --env-file .env -f infra/docker-compose.yml up -d --build --allow=network.host
             echo "::endgroup::"
 
             echo "::group::Esperando ficar saudável"
