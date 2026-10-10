@@ -91,7 +91,22 @@ export default async function HomeView({ locale }: { locale: Locale }) {
             </div>
 
             <h1 className="mt-7 font-display text-[length:var(--text-hero)] font-medium leading-[1.02] tracking-[var(--tracking-hero)] text-pearl-0">
-              {t.title1}
+              {/* O `<span>` em volta da primeira linha nao muda nada visualmente:
+                  ela ja herda a cor do `<h1>`. Serve para o Chrome enxergar um
+                  bloco de texto OPACO proprio, candidato a Largest Contentful
+                  Paint.
+
+                  Sem ele, o `<h1>` inteiro era avaliado como um bloco so — e a
+                  segunda linha usa `bg-clip-text` com `text-transparent` para o
+                  degrade, que o Chrome nao conta como conteudo pintado. Resultado
+                  medido: o Lighthouse nao achava candidato nenhum na pagina e
+                  reportava `NO_LCP`, porque a fotografia de fundo tambem nao
+                  conta (`alt=""` a torna decorativa).
+
+                  `NO_LCP` nao e lentidao — e a ausencia do rotulo. Mas sem a
+                  metrica nao da para saber se uma mudanca futura piorou o
+                  carregamento, e e isso que este span devolve. */}
+              <span>{t.title1}</span>
               <br />
               <span className="bg-[image:linear-gradient(100deg,#FFFFFF_0%,#CFE9F5_42%,var(--color-aqua-400)_100%)] bg-clip-text text-transparent">
                 {t.title2}
