@@ -89,26 +89,35 @@ export default async function BoatView({ slug, locale }: { slug: string; locale:
       />
 
       {/* ================= HERO ================= */}
-      {/* `min-h-[440px]` no celular, e nao 560: as fotografias de hero sao
-          largas (proporcao media 1,64 nas 18 do catalogo) e a area era alta
-          (393x560 = 0,70). Para preencher, o `cover` ampliava a imagem em
-          2,3x e cortava as duas pontas da lancha — a proa saia pela esquerda,
-          a popa pela direita, e nao se via a embarcacao inteira, que e
-          exatamente o que a pagina existe para mostrar.
-
-          440px da proporcao 0,89, bem mais perto das fotos, e continua
-          cabendo trilha, titulo e os dois botoes. O desktop fica como estava:
-          la a area ja e larga e o corte nao acontece. */}
-      <section className="relative isolate -mt-[var(--header-h)] flex min-h-[440px] flex-col justify-end overflow-hidden bg-navy-900 pt-[var(--header-h)] sm:min-h-[560px] lg:min-h-[min(78vh,720px)]">
+      {/* ## Por que a altura no celular nao e fixa
+          
+          As fotografias de hero sao largas — proporcao media 1,64 nas 18 do
+          catalogo — e a area era alta: 393x560, ou 0,70. Para preencher, o
+          `cover` ampliava a foto em 2,3x e cortava as duas pontas da lancha.
+          A proa saia pela esquerda, a popa pela direita, e nao se via a
+          embarcacao inteira — que e exatamente o que a pagina existe para
+          mostrar.
+          
+          Baixar a altura ajuda pouco: medido na foto do Coral 26 (1600x986),
+          mesmo a 340px ainda cortaria 29% da largura, e o hero ficaria
+          apertado para trilha, titulo e botoes.
+          
+          Entao no celular a secao assume a PROPORCAO da foto (16/10, perto da
+          media do catalogo) com um piso de 400px para o conteudo caber. A
+          lancha aparece praticamente inteira; o texto fica sobre a faixa de
+          baixo, onde o degrade ja escurece a imagem.
+          
+          De `sm` para cima volta a altura fixa: a area ja e larga o bastante
+          e o corte nao acontecia. */}
+      <section className="relative isolate -mt-[var(--header-h)] flex aspect-[16/10] min-h-[400px] flex-col justify-end overflow-hidden bg-navy-900 pt-[var(--header-h)] sm:aspect-auto sm:min-h-[560px] lg:min-h-[min(78vh,720px)]">
         {/* A imagem fica, e é ela que o Lighthouse mede como LCP. O vídeo
             entra por cima só depois de carregado — e não entra em quem pediu
             menos movimento ou está em conexão limitada. */}
         {heroImage && (
-          /* `object-[50%_60%]`: as lanchas aparecem na metade de baixo das
-             fotografias (o ceu ocupa o topo). Ancorar o recorte um pouco
-             abaixo do centro mantem o barco enquadrado quando a area e mais
-             alta que a foto. */
-          <Image src={heroImage} alt={label} fill priority sizes="100vw" className="-z-30 object-cover object-[50%_60%]" />
+          /* `object-[50%_55%]`: as lanchas aparecem um pouco abaixo do centro
+             das fotografias (o ceu ocupa o topo). Ancorar ali mantem o barco
+             enquadrado no pouco que ainda sobra de corte. */
+          <Image src={heroImage} alt={label} fill priority sizes="100vw" className="-z-30 object-cover object-[50%_55%]" />
         )}
         {boat.heroVideo && <HeroVideo src={boat.heroVideo} />}
         <div aria-hidden className="absolute inset-0 -z-20" style={{ background: 'var(--scrim-hero)' }} />
