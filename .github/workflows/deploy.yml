@@ -102,6 +102,33 @@ jobs:
             git log -1 --pretty='%h %s'
             echo "::endgroup::"
 
+            echo "::group::Backup do banco"
+            # Antes de QUALQUER migração. Uma migração que falha no meio deixa
+            # o schema num estado intermediário, e o `reset --hard` do código
+            # não desfaz o que já foi aplicado no banco: sem cópia prévia, a
+            # volta atrás seria manual e com os dados de 20 clientes em risco.
+            #
+            # O banco tem ~9 MB e o dump sai em 294 KB, então o custo é de
+            # segundos. `--clean --if-exists` faz o arquivo ser restaurável
+            # por cima de um banco existente, que é o cenário de emergência.
+            mkdir -p ~/backups
+            arquivo=~/backups/coral-$(date +%Y%m%d-%H%M%S).sql
+            docker exec coral-db pg_dump -U coral -d coral --clean --if-exists > "$arquivo"
+
+            # Um dump truncado é pior que nenhum: dá falsa segurança. O
+            # marcador de fim só aparece quando o pg_dump terminou inteiro.
+            if ! grep -q "PostgreSQL database dump complete" "$arquivo"; then
+              echo "::error::backup incompleto — migração abortada"
+              rm -f "$arquivo"
+              exit 1
+            fi
+            echo "backup ok: $(basename "$arquivo") ($(du -h "$arquivo" | cut -f1))"
+
+            # Guarda os 10 últimos. Num servidor pequeno, backup antigo
+            # acumulado enche o disco e derruba o próximo deploy.
+            ls -t ~/backups/coral-*.sql 2>/dev/null | tail -n +11 | xargs -r rm -f
+            echo "::endgroup::"
+
             echo "::group::Migrações do banco"
             # Antes da imagem nova subir: código novo contra schema velho
             # quebra, o contrário costuma sobreviver.

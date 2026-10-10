@@ -165,15 +165,20 @@ caminho.
    arquivo mexido à mão ali faria o pull parar com conflito no meio do deploy.
    Os arquivos ignorados (`.env`, fotos) **não são tocados**: só `git clean` os
    removeria, e ele não é usado.
-2. `prisma migrate deploy` — antes da imagem nova subir, porque código novo
+2. **Backup do banco** — `pg_dump` para `~/backups/coral-<data>.sql`, antes de
+   qualquer migração. O arquivo é conferido pelo marcador de fim do pg_dump: um
+   dump truncado aborta o deploy, porque dá falsa segurança. Guarda os 10
+   últimos e apaga os mais velhos — backup acumulado enche o disco e derruba o
+   deploy seguinte. Custo: segundos (o banco tem ~9 MB, o dump sai em ~294 KB).
+3. `prisma migrate deploy` — antes da imagem nova subir, porque código novo
    contra schema velho quebra, e o contrário costuma sobreviver. Nunca gera nem
    reseta migração.
-3. `docker compose up -d --build`.
-4. Espera o healthcheck do contêiner virar `healthy`, até 5 minutos. O compose
+4. Build e subida da imagem.
+5. Espera o healthcheck do contêiner virar `healthy`, até 5 minutos. O compose
    devolve o controle quando o contêiner inicia, não quando o site responde.
-5. Remove imagens órfãs com mais de 7 dias — num servidor pequeno, elas enchem
+6. Remove imagens órfãs com mais de 7 dias — num servidor pequeno, elas enchem
    o disco e derrubam o deploy seguinte por falta de espaço.
-6. Confere de fora: cinco rotas em 200, quatro cabeçalhos de segurança, e o
+7. Confere de fora: cinco rotas em 200, quatro cabeçalhos de segurança, e o
    painel ainda redirecionando para o login.
 
 ## Se algo der errado
@@ -195,4 +200,13 @@ docker compose --env-file .env -f infra/docker-compose.yml up -d --build
 ```
 
 Migração já aplicada **não volta sozinha** com o reset do código. Se o problema
-for de schema, restaure o backup do banco.
+for de schema, restaure o backup que o próprio deploy tirou antes de migrar:
+
+```bash
+ls -lt ~/backups/coral-*.sql | head -5          # o mais recente é o de antes da migração
+docker exec -i coral-db psql -U coral -d coral < ~/backups/coral-<data>.sql
+```
+
+Há também uma cópia na máquina de desenvolvimento, em `infra/backups/`, fora do
+git — o `.gitignore` exclui a pasta porque o dump carrega nome, e-mail e
+telefone de clientes.
