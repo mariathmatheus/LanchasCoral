@@ -83,8 +83,31 @@ export function lerConsentimento(): Escolha | null {
   }
 }
 
+/*
+ * Três fases, e não um booleano, por causa da métrica de carregamento.
+ *
+ * O banner só pode pintar depois da hidratação (a decisão mora no
+ * `localStorage`), então ele é sempre o último bloco grande a aparecer. O
+ * Chrome registra o MAIOR bloco pintado como Largest Contentful Paint, e o
+ * texto daqui é maior que o do hero — então o banner roubava a métrica.
+ *
+ * Medido em 4G lento: com o banner, LCP de 3880ms; com a decisão já tomada
+ * (quem já visitou o site), 1700ms. O banner sozinho dobrava a métrica.
+ *
+ * A saída é pintar primeiro com `opacity: 0`. O Chrome ignora pinturas
+ * totalmente transparentes para efeito de LCP desde a versão 86 — é a única
+ * exclusão documentada no changelog deles. Dois quadros depois, o banner
+ * aparece com transição; essa revelação não o torna candidato de novo.
+ *
+ * O banner continua no DOM e na árvore de acessibilidade desde a fase
+ * `montado`: leitor de tela e teclado funcionam durante os ~32ms. Quem clica
+ * em "Preferências de cookies" no rodapé pula direto para `visivel` — já
+ * pediu o banner, não há motivo para atraso.
+ */
+type Fase = 'oculto' | 'montado' | 'visivel'
+
 export default function Consentimento({ locale = 'pt' }: { locale?: Locale }) {
-  const [aberto, setAberto] = useState(false)
+  const [fase, setFase] = useState<Fase>('oculto')
   const t = getDict(locale).cookies
 
   useEffect(() => {
@@ -92,7 +115,7 @@ export default function Consentimento({ locale = 'pt' }: { locale?: Locale }) {
        antecipada. Registrá-lo só quando o banner está aberto deixava o link
        "Preferências de cookies" inerte justamente para quem já decidiu — que
        é exatamente quem precisa dele para mudar de ideia. */
-    const reabrir = () => setAberto(true)
+    const reabrir = () => setFase('visivel')
     window.addEventListener('coral:abrir-consentimento', reabrir)
     const limpar = () => window.removeEventListener('coral:abrir-consentimento', reabrir)
 
@@ -109,8 +132,19 @@ export default function Consentimento({ locale = 'pt' }: { locale?: Locale }) {
        aparecer depois da montagem. Ler no corpo do componente faria o HTML do
        servidor divergir do cliente e quebraria a hidratacao. */
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    setAberto(true)
-    return limpar
+    setFase('montado')
+    /* Dois quadros: o primeiro pinta com `opacity: 0`, o segundo revela. Um só
+       não basta — o React pode agrupar as duas mudanças de estado na mesma
+       pintura, e aí o banner nasceria visível e voltaria a disputar o LCP. */
+    let segundo = 0
+    const primeiro = requestAnimationFrame(() => {
+      segundo = requestAnimationFrame(() => setFase('visivel'))
+    })
+    return () => {
+      cancelAnimationFrame(primeiro)
+      cancelAnimationFrame(segundo)
+      limpar()
+    }
   }, [])
 
   const decidir = (estatisticas: boolean, marketing: boolean) => {
@@ -128,10 +162,10 @@ export default function Consentimento({ locale = 'pt' }: { locale?: Locale }) {
          na próxima. Melhor perguntar de novo do que assumir consentimento. */
     }
     aplicar(escolha)
-    setAberto(false)
+    setFase('oculto')
   }
 
-  if (!aberto) return null
+  if (fase === 'oculto') return null
 
   return (
     <div
@@ -140,8 +174,16 @@ export default function Consentimento({ locale = 'pt' }: { locale?: Locale }) {
       aria-labelledby="consentimento-titulo"
       /* `z-[130]`: acima dos diálogos (z-120), porque a escolha precede
          qualquer outra interação. Ancorado embaixo para não cobrir o conteúdo
-         que a pessoa veio ler. */
-      className="fixed inset-x-0 bottom-0 z-[130] border-t border-[var(--border-subtle)] bg-[var(--surface-card)] shadow-[var(--shadow-lg)] print:hidden"
+         que a pessoa veio ler.
+
+         A opacidade é o que mantém o banner fora da conta do LCP: ele pinta
+         transparente e só então aparece. Ver o comentário das fases acima.
+         `motion-safe` respeita quem pediu menos animação — aí o banner surge
+         direto, o que é correto: a exclusão vem da primeira pintura, não da
+         transição. */
+      className={`fixed inset-x-0 bottom-0 z-[130] border-t border-[var(--border-subtle)] bg-[var(--surface-card)] shadow-[var(--shadow-lg)] motion-safe:transition-opacity motion-safe:duration-300 print:hidden ${
+        fase === 'visivel' ? 'opacity-100' : 'opacity-0'
+      }`}
     >
       <div className="container-page flex flex-col gap-4 py-5 lg:flex-row lg:items-center lg:justify-between lg:gap-8">
         <div className="max-w-[72ch]">
