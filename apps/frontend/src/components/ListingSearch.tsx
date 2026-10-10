@@ -128,15 +128,15 @@ import { href, type Locale } from '@/i18n/config'
           </div>
         ))}
 
-        {/* `relative z-50`: a linha fica no fim do painel de filtros, no canto
-            direito — exatamente onde o botao flutuante do WhatsApp (z-40)
-            mora. Medido em 320, 390 e 430px: o toque no "Limpar filtros" ia
-            inteiro para o WhatsApp, e quem filtrava e queria desfazer acabava
-            numa conversa.
+        {/* `data-filtros-fim` marca esta linha para o CSS: enquanto ela esta
+            na tela, o botao flutuante do WhatsApp se afasta. O "Limpar
+            filtros" fica no canto direito, exatamente onde o botao mora, e o
+            toque ia inteiro para ele — medido em 320, 390 e 430px.
 
-            Acima de z-40 e abaixo do cabecalho (z-50 tambem, mas em outra
-            pilha) e dos dialogos (z-110+), entao nada mais muda. */}
-        <div className="relative z-50 flex gap-2">
+            `z-index` nao resolve: o botao e `fixed` e vive na propria pilha,
+            entao elevar este bloco dentro do fluxo nao o alcanca. Ver
+            globals.css. */}
+        <div data-filtros-fim className="flex gap-2">
           <SubmitButton size="sm" className="h-11 flex-1">
             {t.apply}
           </SubmitButton>

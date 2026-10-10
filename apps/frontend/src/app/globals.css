@@ -339,6 +339,22 @@ body:has([data-consentimento]) [data-zap] {
   bottom: calc(var(--altura-consentimento, 17rem) + 1.25rem);
 }
 
+/*
+ * O botao do WhatsApp sai do canto enquanto o painel de filtros do Broker
+ * esta aberto.
+ *
+ * O "Limpar filtros" fica no fim daquele painel, encostado na direita — o
+ * mesmo canto do botao flutuante. Medido em 320, 390 e 430px: o toque nele ia
+ * inteiro para o WhatsApp, e quem filtrava e queria desfazer acabava numa
+ * conversa.
+ *
+ * `z-index` no painel nao resolve: o botao e `fixed`, vive na propria pilha, e
+ * elevar um bloco dentro do fluxo nao o alcanca. Mover o botao, sim.
+ */
+body:has([data-filtros-fim]) [data-zap] {
+  right: 5rem;
+}
+
 body:has([data-zap]) .nr-badge {
   right: 5rem;
 }
