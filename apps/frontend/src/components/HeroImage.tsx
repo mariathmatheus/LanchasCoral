@@ -60,12 +60,16 @@ const CELULAR = '(max-width: 639px)'
  *
  * Medido num 412x820 em DPR 2: o cover precisa de 960px de largura, mas
  * `sizes="100vw"` pedia 824. O Next servia 828 e o navegador ampliava, com
- * perda de nitidez. Os 120vw cobrem a diferenca com folga.
+ * perda de nitidez.
+ *
+ * 116vw da 956 fisicos, que cai no degrau 960 da escala — o arquivo exato de
+ * que o cover precisa. Com 120vw o pedido ia a 989 e subia para 1080, 67KB
+ * em vez de 48KB sem ganho nenhum de nitidez.
  *
  * O paisagem nao tem esse problema (e mais largo que alto em qualquer tela),
  * entao fica em 100vw.
  */
-const LARGURA_RETRATO = '120vw'
+const LARGURA_RETRATO = '116vw'
 
 export default function HeroImage({ alt = '', className = '' }: { alt?: string; className?: string }) {
   const comum = { alt, quality: 72 } as const
