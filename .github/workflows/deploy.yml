@@ -13,9 +13,11 @@
 #
 # ## Como o deploy chega lá
 #
-# O site roda atrás de um túnel Cloudflare, sem porta HTTP aberta. O caminho é
-# SSH: o runner conecta, atualiza o repositório e sobe a pilha. Exige que a
-# porta 22 aceite os IPs do GitHub — veja infra/README.md.
+# Por SSH: o runner conecta, atualiza o repositório e sobe a pilha. Exige que a
+# porta 22 aceite os IPs do GitHub — veja infra/README-deploy.md.
+#
+# Quem atende o público é o Caddy, nas portas 80 e 443 do servidor. A aplicação
+# e o banco não publicam porta para a internet.
 
 name: Verificar e publicar
 
@@ -168,6 +170,45 @@ jobs:
             docker compose --env-file .env -f infra/docker-compose.yml build --print > /tmp/coral-bake.json
             docker buildx bake -f /tmp/coral-bake.json --allow=network.host --set '*.output=type=docker'
             docker compose --env-file .env -f infra/docker-compose.yml up -d --no-build
+            echo "::endgroup::"
+
+            echo "::group::Aplicando a configuração do proxy"
+            # O Caddyfile entra no contêiner por bind mount de ARQUIVO, e o
+            # `git reset --hard` do passo anterior não edita o arquivo: ele o
+            # substitui, criando um inode novo. O bind mount continua apontando
+            # para o inode antigo, então o contêiner segue vendo a configuração
+            # velha — mesmo depois de reiniciar, e mesmo depois de um
+            # `caddy reload`, que relê fielmente o arquivo errado.
+            #
+            # Medido no servidor: deploy com Caddyfile novo, `reload` bem
+            # sucedido, e o Caddy ainda servindo a configuração anterior.
+            #
+            # Recriar o contêiner refaz o mount. É barato (o Caddy sobe em
+            # menos de um segundo) e, ao contrário do reload, não tem como
+            # ficar meio aplicado.
+            #
+            # Antes disso, valida: configuração inválida aqui derrubaria a
+            # única porta de entrada do site. `caddy validate` roda numa
+            # imagem descartável, sem tocar no contêiner em pé.
+            docker run --rm -v "$PWD/infra/Caddyfile:/etc/caddy/Caddyfile:ro"               caddy:2-alpine caddy validate --config /etc/caddy/Caddyfile
+
+            docker compose --env-file .env -f infra/docker-compose.yml up -d               --no-build --force-recreate proxy
+
+            # O Caddy só reporta erro de certificado no log, e devolve 200 de
+            # qualquer forma enquanto serve por HTTP. Confere o que o proxy
+            # realmente entrega, de dentro do servidor.
+            for i in $(seq 1 10); do
+              codigo=$(curl -sS -o /dev/null -w '%{http_code}' --max-time 10                 http://127.0.0.1/ 2>/dev/null || echo 000)
+              case "$codigo" in
+                200|30[128]) echo "proxy respondendo ($codigo)"; break ;;
+              esac
+              [ "$i" = "10" ] && {
+                echo "::error::proxy não respondeu ($codigo)"
+                docker logs --tail 30 coral-proxy
+                exit 1
+              }
+              sleep 2
+            done
             echo "::endgroup::"
 
             echo "::group::Esperando ficar saudável"
