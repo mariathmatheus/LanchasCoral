@@ -47,7 +47,7 @@ const linhaJaExistia = Boolean(antes)
 try {
   console.log('--- ACESSO ---')
   const semSessao = await ctx.newPage()
-  const r = await semSessao.goto(`${BASE}/admin/email`, { waitUntil: 'domcontentloaded' })
+  await semSessao.goto(`${BASE}/admin/email`, { waitUntil: 'domcontentloaded' })
   conf(semSessao.url().includes('/admin/login'), 'o configurador exige login')
   await semSessao.close()
 

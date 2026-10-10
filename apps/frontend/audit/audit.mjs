@@ -325,7 +325,6 @@ async function testaPopupProposta(page, vp, pagina) {
   const st = await page.evaluate(() => {
     const d = document.querySelector('[role="dialog"]')
     if (!d) return { aberto: false }
-    const b = d.getBoundingClientRect()
     const painel = d.firstElementChild?.getBoundingClientRect()
     return {
       aberto: true,

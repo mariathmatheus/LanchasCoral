@@ -68,7 +68,19 @@ export default function Carousel({
         role="region"
         aria-label={label}
         tabIndex={0}
-        className="-mx-1 flex snap-x snap-mandatory items-stretch gap-6 overflow-x-auto scroll-smooth px-1 pb-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        /* `scroll-pl-1` casa com o `px-1`: sem ele, o primeiro cartao comeca a
+           4px da borda de rolagem, o `snap-mandatory` considera isso fora do
+           ponto de encaixe e o navegador corrige para `scrollLeft: 4` assim que
+           mede o conteudo.
+           
+           Esse ajuste de 4px gera um evento de scroll real, que o Chrome conta
+           como interacao do usuario — e a primeira interacao ENCERRA a medicao
+           de Largest Contentful Paint. Medido: o evento chegava aos 186ms, 23ms
+           depois da primeira pintura, e o Lighthouse reportava `NO_LCP` na home
+           inteira. Em `/sobre`, que nao tem carrossel, o LCP aparecia normal.
+           
+           Com o `scroll-pl-1` o scroll some e o LCP volta a ser medido. */
+        className="-mx-1 flex snap-x snap-mandatory items-stretch gap-6 overflow-x-auto scroll-smooth scroll-pl-1 px-1 pb-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       >
         {children.map((child, i) => (
           <div

@@ -55,6 +55,15 @@ export default function NerdResolveBadge({
         aria-label="Site desenvolvido por NerdResolve"
         title="Desenvolvido por NerdResolve"
       >
+        {/* `<img>` cru, e nao `next/image`, de proposito: este badge e copiado
+            inteiro para outros projetos da agencia, inclusive os que nao usam
+            Next. Trocar por `next/image` o amarraria ao framework e ao servidor
+            de otimizacao de imagens.
+            
+            O que o `next/image` traria aqui ja esta coberto a mao: as duas
+            dimensoes evitam deslocamento de layout, e o `lazy` tira o badge do
+            caminho critico. Sao 28x9px no rodape — nao ha o que otimizar. */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={src}
           alt="NerdResolve"

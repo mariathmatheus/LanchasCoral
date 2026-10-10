@@ -12,6 +12,20 @@ import { PrismaClient } from '@prisma/client'
 import { PrismaPg } from '@prisma/adapter-pg'
 
 const BASE = process.argv[2] ?? 'https://coral.nerdresolve.com'
+
+/*
+ * O endereco que a pagina DECLARA pode diferir do endereco por onde ela e
+ * servida. Entre a troca do dominio no compose e a virada do DNS, o site
+ * responde por coral.nerdresolve.com mas declara canonical, hreflang e
+ * og:image apontando para lanchascoral.com.br — que e o estado correto e
+ * desejado nessa janela.
+ *
+ * Comparar literalmente acusaria as 35 paginas como quebradas. O validador
+ * descobre o dominio declarado a partir do canonical da primeira pagina e
+ * compara os caminhos contra ele, sem deixar de conferir que o conteudo
+ * existe: a verificacao de og:image e refeita contra o BASE que responde.
+ */
+let DECLARADO = BASE
 const prisma = new PrismaClient({
   adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL }),
 })
@@ -64,7 +78,13 @@ if (sm.status !== 200) {
   await prisma.$disconnect()
   process.exit(1)
 }
-const noSitemap = (caminho) => sm.corpo.includes(`${BASE}${caminho}<`) || sm.corpo.includes(`${BASE}${caminho}"`)
+/* O sitemap e o canonical usam o dominio declarado, nao o que serve. */
+const mDom = sm.corpo.match(/<loc>(https?:\/\/[^/]+)/)
+if (mDom && mDom[1] !== BASE) {
+  DECLARADO = mDom[1]
+  console.log(`servido por ${BASE}, declarado como ${DECLARADO}`)
+}
+const noSitemap = (caminho) => sm.corpo.includes(`${DECLARADO}${caminho}<`) || sm.corpo.includes(`${DECLARADO}${caminho}"`)
 
 /* --------------------------------------------------- verificacao por item */
 
@@ -87,7 +107,7 @@ for (let i = 0; i < ALVOS.length; i += LOTE) {
       // 2. Canonical aponta para ela mesma?
       const canon = achar(pt.corpo, /<link rel="canonical" href="([^"]+)"/)
       if (!canon) marcar('sem canonical', a.pt)
-      else if (canon !== `${BASE}${a.pt}`) marcar('canonical aponta para outra URL', `${a.pt} -> ${canon}`)
+      else if (canon !== `${DECLARADO}${a.pt}`) marcar('canonical aponta para outra URL', `${a.pt} -> ${canon}`)
 
       // 3. Tem title e description proprios?
       const title = achar(pt.corpo, /<title>([^<]*)<\/title>/)
@@ -107,8 +127,8 @@ for (let i = 0; i < ALVOS.length; i += LOTE) {
       /* Atributo HTML e case-insensitive e o Next emite `hrefLang` em camelCase;
          comparar minusculo acusava as 35 paginas como quebradas sem estarem. */
       const alternates = (pt.corpo.match(/<link rel="alternate"[^>]*>/gi) || []).join('').toLowerCase()
-      const temPt = alternates.includes(`hreflang="pt-br" href="${BASE}${a.pt}"`.toLowerCase())
-      const temEn = alternates.includes(`hreflang="en" href="${BASE}${a.en}"`.toLowerCase())
+      const temPt = alternates.includes(`hreflang="pt-br" href="${DECLARADO}${a.pt}"`.toLowerCase())
+      const temEn = alternates.includes(`hreflang="en" href="${DECLARADO}${a.en}"`.toLowerCase())
       if (!temPt) marcar('hreflang sem autorreferencia', a.pt)
       if (!temEn) marcar('hreflang nao declara o par EN', `${a.pt} -> esperado ${a.en}`)
 
@@ -116,7 +136,10 @@ for (let i = 0; i < ALVOS.length; i += LOTE) {
       const og = achar(pt.corpo, /<meta property="og:image" content="([^"]+)"/)
       if (!og) marcar('sem og:image', a.pt)
       else {
-        const img = await pegar(og.startsWith('http') ? og : `${BASE}${og}`)
+        /* Troca o dominio declarado pelo que responde: o arquivo existe aqui,
+           ainda que a tag aponte para o endereco futuro. */
+        const alvoOg = og.startsWith('http') ? og.replace(DECLARADO, BASE) : `${BASE}${og}`
+        const img = await pegar(alvoOg)
         if (img.status !== 200) marcar('og:image quebrada', `${a.pt} -> ${og.slice(-60)} (${img.status})`)
       }
 
@@ -126,7 +149,7 @@ for (let i = 0; i < ALVOS.length; i += LOTE) {
         marcar('rota EN nao responde 200', `${a.en} -> ${en.status}`)
       } else {
         const canonEn = achar(en.corpo, /<link rel="canonical" href="([^"]+)"/)
-        if (canonEn && canonEn !== `${BASE}${a.en}`) {
+        if (canonEn && canonEn !== `${DECLARADO}${a.en}`) {
           marcar('canonical EN aponta para o PT', `${a.en} -> ${canonEn}`)
         }
         if (achar(en.corpo, /<html lang="([^"]+)"/) !== 'en') marcar('lang do html errado na rota EN', a.en)
@@ -149,8 +172,8 @@ for (let i = 0; i < ALVOS.length; i += LOTE) {
 /* ------------------------------------- o caminho inverso: sitemap -> banco */
 
 const noXml = [...sm.corpo.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1])
-const dinamicas = noXml.filter((u) => /\/(modelos|broker|dicas)\/[^/]+$/.test(u.replace(BASE, '')))
-const conhecidas = new Set(ALVOS.map((a) => `${BASE}${a.pt}`))
+const dinamicas = noXml.filter((u) => /\/(modelos|broker|dicas)\/[^/]+$/.test(u.replace(DECLARADO, '')))
+const conhecidas = new Set(ALVOS.map((a) => `${DECLARADO}${a.pt}`))
 for (const u of dinamicas) {
   if (!conhecidas.has(u)) erro('(sitemap)', 'URL no sitemap sem item publicado correspondente', u)
 }
