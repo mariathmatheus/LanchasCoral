@@ -48,3 +48,6 @@ Coral Website (offline).html
 # Protótipo de design (Claude Design canvas), anterior à implementação.
 # Serviu de ponto de partida; o que vale hoje é o código em apps/frontend.
 design/
+
+# Scripts temporarios de medicao, criados por auditoria e nao versionados.
+apps/frontend/.tmp-*
