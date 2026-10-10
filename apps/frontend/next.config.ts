@@ -23,6 +23,22 @@ const nextConfig: NextConfig = {
      */
     remotePatterns: [],
     formats: ['image/avif', 'image/webp'],
+    /*
+     * Degraus intermediarios na escala de larguras.
+     *
+     * O Next escolhe, para cada imagem, o primeiro degrau >= a largura
+     * necessaria. A escala padrao salta de 828 para 1080, e nesse vao caem
+     * telas comuns: um celular de 480 CSS px em DPR 2 precisa de 960 e recebe
+     * 1080 — 13% de bytes que ninguem ve.
+     *
+     * Medido pelo Lighthouse: a foto do hero vinha em 645x1282 para ser
+     * exibida em 480x820, com 22KB de sobra. O 960 fecha exatamente esse vao.
+     *
+     * Os outros degraus seguem a mesma logica para os cartoes (que pedem
+     * ~370 CSS px) e para telas grandes. Cada degrau e um arquivo a mais no
+     * cache do servidor de imagens, entao sao poucos e escolhidos.
+     */
+    deviceSizes: [640, 750, 828, 960, 1080, 1200, 1440, 1920, 2048, 3840],
   },
 
   /**
