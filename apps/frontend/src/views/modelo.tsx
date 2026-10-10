@@ -102,14 +102,19 @@ export default async function BoatView({ slug, locale }: { slug: string; locale:
           mesmo a 340px ainda cortaria 29% da largura, e o hero ficaria
           apertado para trilha, titulo e botoes.
           
-          Entao no celular a secao assume a PROPORCAO da foto (16/10, perto da
-          media do catalogo) com um piso de 400px para o conteudo caber. A
-          lancha aparece praticamente inteira; o texto fica sobre a faixa de
-          baixo, onde o degrade ja escurece a imagem.
+          Entao a altura cai para 420px no celular. Nao resolve o corte por
+          inteiro — a foto ainda e mais larga que o vao —, mas tira a maior
+          parte dele e mantem o conteudo confortavel.
           
-          De `sm` para cima volta a altura fixa: a area ja e larga o bastante
-          e o corte nao acontecia. */}
-      <section className="relative isolate -mt-[var(--header-h)] flex aspect-[16/10] min-h-[400px] flex-col justify-end overflow-hidden bg-navy-900 pt-[var(--header-h)] sm:aspect-auto sm:min-h-[560px] lg:min-h-[min(78vh,720px)]">
+          NAO usar `aspect-ratio` aqui: combinado com `min-height`, ele infla a
+          LARGURA para manter a proporcao. Medido: `aspect-[16/10]` com
+          `min-h-[400px]` fazia a secao ter 640px de largura numa tela de 390,
+          e tudo dentro dela herdava isso — os botoes do hero saiam do
+          viewport. Altura fixa nao tem esse efeito.
+          
+          De `sm` para cima a area ja e larga o bastante e o corte nao
+          acontecia; a altura volta ao que era. */}
+      <section className="relative isolate -mt-[var(--header-h)] flex min-h-[420px] flex-col justify-end overflow-hidden bg-navy-900 pt-[var(--header-h)] sm:min-h-[560px] lg:min-h-[min(78vh,720px)]">
         {/* A imagem fica, e é ela que o Lighthouse mede como LCP. O vídeo
             entra por cima só depois de carregado — e não entra em quem pediu
             menos movimento ou está em conexão limitada. */}
