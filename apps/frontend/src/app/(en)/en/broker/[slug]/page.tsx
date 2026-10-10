@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { ogDeProduto } from '@/lib/og-imagem'
 import ListingView from '@/views/listing'
 import SiteFooter from '@/components/SiteFooter'
 import { getListingBySlug, getListingSlugs } from '@/lib/queries'
@@ -22,7 +23,15 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
     title: l.title,
     description: `${l.title}${price}. Pre-owned boat brokered by Coral.`,
     alternates: alternatesEn(`/broker/${l.slug}`, `/en/broker/${l.slug}`),
-    openGraph: { title: l.title, images: l.heroImage ? [{ url: l.heroImage }] : undefined },
+    openGraph: ogDeProduto({
+      titulo: l.title,
+      descricao: `${l.title}${price}. Pre-owned boat brokered by Coral.`,
+      url: `/en/broker/${l.slug}`,
+      // Mesma fotografia nas duas linguas: reusa a rota em portugues.
+      imagem: `/broker/${l.slug}/og`,
+      locale: 'en_US',
+    }),
+    twitter: { card: 'summary_large_image', images: [`/broker/${l.slug}/og`] },
   }
 }
 

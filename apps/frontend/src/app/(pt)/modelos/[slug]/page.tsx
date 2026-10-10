@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { ogDeProduto } from '@/lib/og-imagem'
 import BoatView from '@/views/modelo'
 import SiteFooter from '@/components/SiteFooter'
 import { getBoatBySlug, getBoatSlugs, boatLabel } from '@/lib/queries'
@@ -23,7 +24,14 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
     description:
       boat.seoDescription ?? boat.tagline ?? `Conheça a ${label}: especificações, equipamentos e galeria.`,
     alternates: alternates(`/modelos/${boat.slug}`, `/en/models/${boat.slug}`),
-    openGraph: { title: label, images: boat.heroImage ? [{ url: boat.heroImage }] : undefined },
+    openGraph: ogDeProduto({
+      titulo: label,
+      descricao: boat.seoDescription ?? boat.tagline ?? `Conheça a ${label}.`,
+      url: `/modelos/${boat.slug}`,
+      imagem: `/modelos/${boat.slug}/og`,
+      locale: 'pt_BR',
+    }),
+    twitter: { card: 'summary_large_image', images: [`/modelos/${boat.slug}/og`] },
   }
 }
 

@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { ogDeProduto } from '@/lib/og-imagem'
 import BoatView from '@/views/modelo'
 import SiteFooter from '@/components/SiteFooter'
 import { getBoatBySlug, getBoatSlugs, boatLabel, localizeBoat } from '@/lib/queries'
@@ -22,7 +23,15 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
     title: label,
     description: boat.tagline ?? `${label}: specifications, equipment and gallery.`,
     alternates: alternatesEn(`/modelos/${boat.slug}`, `/en/models/${boat.slug}`),
-    openGraph: { title: label, images: boat.heroImage ? [{ url: boat.heroImage }] : undefined },
+    openGraph: ogDeProduto({
+      titulo: label,
+      descricao: boat.seoDescription ?? boat.tagline ?? `Discover the ${label}.`,
+      url: `/en/models/${boat.slug}`,
+      // A fotografia nao muda com o idioma: aponta para a rota em portugues.
+      imagem: `/modelos/${boat.slug}/og`,
+      locale: 'en_US',
+    }),
+    twitter: { card: 'summary_large_image', images: [`/modelos/${boat.slug}/og`] },
   }
 }
 
