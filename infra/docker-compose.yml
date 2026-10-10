@@ -1,14 +1,15 @@
-# Pilha do site da Coral: banco, aplicação e túnel Cloudflare.
+# Pilha do site da Coral: banco, aplicação, proxy e túnel.
 #
 #   docker compose -f infra/docker-compose.yml up -d --build
 #
-# O túnel é a única porta de entrada pública: nem a aplicação nem o banco
-# expõem porta para fora do host. O `cloudflared` abre uma conexão de saída
-# até a borda da Cloudflare, então não é preciso abrir nada no firewall nem
-# ter IP fixo.
+# A entrada pública é o Caddy, nas portas 80 e 443 do host: ele termina o TLS
+# para lanchascoral.com.br e repassa para a aplicação pela rede interna. Nem a
+# aplicação nem o banco publicam porta para a internet.
 #
-# Antes do primeiro `up`, rode `node infra/cloudflare-setup.mjs` para criar o
-# túnel, a rota e o DNS, e gerar `infra/.env.tunnel`.
+# O túnel Cloudflare continua de pé como segunda entrada, pelo endereço de
+# teste (coral.nerdresolve.com). Ele vive numa conta de terceiro — a da
+# agência, não a da Coral — então não pode ser o caminho definitivo; some
+# quando o domínio oficial estiver servindo sozinho.
 
 # O nome do projeto NÃO é declarado de propósito: o compose o deriva do
 # diretório (`infra`), e é assim que o volume do banco em uso se chama
@@ -103,7 +104,40 @@ services:
     networks:
       - coral
 
+  proxy:
+    # A porta de entrada do site. Caddy em vez de Nginx porque emite e renova o
+    # certificado sozinho, sem cron nem passo manual — num servidor que ninguém
+    # vai administrar no dia a dia, um certificado que expira é o site fora do
+    # ar, e esse é o modo de falha a evitar.
+    image: caddy:2-alpine
+    container_name: coral-proxy
+    restart: unless-stopped
+    ports:
+      # 443 serve o site; 80 não é opcional: o Let's Encrypt valida o domínio
+      # por HTTP e a renovação, a cada 60 dias, usa o mesmo caminho. Fechá-la
+      # depois da primeira emissão faria o certificado expirar em silêncio.
+      - "80:80"
+      - "443:443"
+    volumes:
+      # `:ro` — o Caddy não tem motivo para reescrever a própria configuração.
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      # Onde ficam as chaves e os certificados emitidos. Em volume nomeado, e
+      # não efêmero: sem isto, cada `up` pediria certificado novo e bateria no
+      # limite de emissões do Let's Encrypt (5 por domínio por semana), que
+      # deixaria o site sem HTTPS por dias.
+      - coral_caddy_data:/data
+      - coral_caddy_config:/config
+      - coral_caddy_log:/var/log/caddy
+    depends_on:
+      app:
+        condition: service_healthy
+    networks:
+      - coral
+
   tunnel:
+    # Segunda entrada, pelo endereço de teste. Mantido durante a virada de
+    # domínio: se o DNS ou o certificado do domínio oficial der problema, ainda
+    # há um endereço funcionando para conferir se o site em si está de pé.
     image: cloudflare/cloudflared:latest
     container_name: coral-tunnel
     restart: unless-stopped
@@ -123,6 +157,11 @@ services:
 
 volumes:
   coral_pgdata:
+  # Certificados e chaves emitidos pelo Let's Encrypt. Perder este volume
+  # significa reemitir tudo — daí ser nomeado.
+  coral_caddy_data:
+  coral_caddy_config:
+  coral_caddy_log:
 
 networks:
   coral:

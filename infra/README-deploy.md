@@ -129,7 +129,62 @@ marcando *Required reviewers* — sem tocar no workflow.
 
 ---
 
-## Firewall
+## Entrada pública: Caddy nas portas 80 e 443
+
+O site é servido pelo `coral-proxy` (Caddy), que termina o TLS de
+`lanchascoral.com.br` e repassa para a aplicação pela rede interna do compose.
+A aplicação segue sem publicar porta no host.
+
+Caddy em vez de Nginx por um motivo só: emite e renova o certificado sozinho,
+sem cron nem passo manual. Num servidor que ninguém vai administrar no dia a
+dia, certificado expirado é o site fora do ar — e é o modo de falha mais
+provável de um Nginx configurado à mão.
+
+A configuração está em [`infra/Caddyfile`](Caddyfile). Para conferir antes de
+subir:
+
+```bash
+docker run --rm -v "$PWD/infra/Caddyfile:/etc/caddy/Caddyfile:ro"   caddy:2-alpine caddy validate --config /etc/caddy/Caddyfile
+```
+
+### Abrir as portas no firewalld
+
+```bash
+firewall-cmd --permanent --add-service=http
+firewall-cmd --permanent --add-service=https
+firewall-cmd --reload
+firewall-cmd --list-services     # precisa listar http e https
+```
+
+A 80 **não** é opcional, nem depois da primeira emissão: o Let's Encrypt valida
+o domínio por HTTP e a renovação, a cada 60 dias, usa o mesmo caminho. Fechá-la
+faria o certificado expirar em silêncio dois meses depois.
+
+### Ordem da virada de domínio
+
+O certificado só é emitido depois que o DNS já aponta para cá — o Let's
+Encrypt precisa alcançar a porta 80 neste IP para validar. Então:
+
+1. Caddy no ar com as portas abertas (`curl -I http://216.128.171.143` responde,
+   mesmo que com erro de host desconhecido).
+2. Registro A de `lanchascoral.com.br` e `www` → `216.128.171.143`, **sem**
+   proxy da Cloudflare (nuvem cinza). Com a nuvem laranja, a Cloudflare
+   intercepta o desafio e a emissão falha.
+3. Esperar o DNS propagar (`dig +short lanchascoral.com.br`).
+4. O primeiro acesso HTTPS dispara a emissão; leva poucos segundos.
+   `docker logs coral-proxy` mostra o resultado.
+5. Trocar `vars.SITE_URL` no GitHub para `https://lanchascoral.com.br`, para o
+   job de conferência passar a medir o endereço definitivo.
+
+O túnel Cloudflare continua de pé pelo endereço de teste
+(`coral.nerdresolve.com`) durante a virada: se o DNS ou o certificado der
+problema, ainda há um endereço funcionando para conferir se o site em si está
+de pé. Ele vive na conta da agência, não na da Coral, então não é o caminho
+definitivo — sai de cena quando o domínio oficial estiver servindo sozinho.
+
+---
+
+## Firewall (SSH)
 
 O runner da GitHub tem IP variável. Três caminhos, do mais simples ao mais
 fechado:
