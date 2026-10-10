@@ -312,6 +312,15 @@ const DICT = {
       email: 'E-mail',
       whatsapp: 'Chamar no WhatsApp',
     },
+    cookies: {
+      titulo: 'Cookies e medição',
+      texto:
+        'Usamos cookies para entender como o site é usado e medir a eficiência das campanhas. Você escolhe: nada é ativado sem a sua autorização, e dá para mudar de ideia pelo rodapé.',
+      link: 'Ler a política de privacidade',
+      aceitar: 'Aceitar',
+      recusar: 'Recusar',
+      preferencias: 'Preferências de cookies',
+    },
     zap: {
       label: 'Falar no WhatsApp',
       /* Primeira mensagem já enviada pela pessoa. Sem ela o consultor recebe
@@ -627,6 +636,15 @@ const DICT = {
       phone: 'Phone',
       email: 'Email',
       whatsapp: 'Message on WhatsApp',
+    },
+    cookies: {
+      titulo: 'Cookies and measurement',
+      texto:
+        'We use cookies to understand how the site is used and to measure campaign performance. The choice is yours: nothing runs without your consent, and you can change it from the footer.',
+      link: 'Read the privacy policy',
+      aceitar: 'Accept',
+      recusar: 'Decline',
+      preferencias: 'Cookie preferences',
     },
     zap: {
       label: 'Chat on WhatsApp',

@@ -4,6 +4,7 @@ import { organizationSchema, websiteSchema } from '@/lib/schema'
 import { getTelefonesPublicados } from '@/lib/contatos'
 import BotaoZap from '@/components/BotaoZap'
 import Atribuicao from '@/components/Atribuicao'
+import Consentimento from '@/components/Consentimento'
 import './globals.css'
 
 /**
@@ -37,6 +38,15 @@ const jetbrains = JetBrains_Mono({
 
 export const fontVars = `${montserrat.variable} ${jetbrains.variable}`
 
+/**
+ * Contêiner do Google Tag Manager.
+ *
+ * Fica numa variável de ambiente para que o site só carregue tag em produção:
+ * rodar o contêiner em desenvolvimento encheria os relatórios de sessões que
+ * não são de visitante nenhum. Ausente, nada é injetado.
+ */
+const GTM_ID = process.env.NEXT_PUBLIC_GTM_ID
+
 export async function Shell({
   lang,
   children,
@@ -64,12 +74,53 @@ export async function Shell({
             __html: `document.documentElement.classList.remove('no-js')`,
           }}
         />
+
+        {/*
+          Consent Mode v2 em estado NEGADO, antes de qualquer tag.
+
+          Tem de rodar antes do Tag Manager: se o primeiro disparo sair sem
+          consentimento declarado, o problema de LGPD nasce junto com a
+          instalação. Com isto o GTM carrega sempre, mas sem permissão para
+          gravar nada — as tags ficam esperando, e só disparam quando o banner
+          (components/Consentimento.tsx) manda o `update`.
+
+          `wait_for_update` dá meio segundo para a resposta de quem já decidiu
+          numa visita anterior, evitando que a tag seja descartada por chegar
+          antes da leitura do localStorage.
+        */}
+        {GTM_ID && (
+          <script
+            dangerouslySetInnerHTML={{
+              __html:
+                `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}` +
+                `gtag('consent','default',{'analytics_storage':'denied','ad_storage':'denied',` +
+                `'ad_user_data':'denied','ad_personalization':'denied','wait_for_update':500});`,
+            }}
+          />
+        )}
+
+        {/* O contêiner. Sem `NEXT_PUBLIC_GTM_ID` nada é injetado — é assim que
+            desenvolvimento e pré-visualização não poluem os dados de produção. */}
+        {GTM_ID && (
+          <script
+            dangerouslySetInnerHTML={{
+              __html:
+                `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});` +
+                `var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';` +
+                `j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;` +
+                `f.parentNode.insertBefore(j,f)})(window,document,'script','dataLayer','${GTM_ID}');`,
+            }}
+          />
+        )}
         {/* Identidade do estaleiro e do site: base do Knowledge Panel. */}
         <JsonLd data={[organizationSchema(telefones), websiteSchema()]} />
         {/* Grava a origem da visita na primeira pagina aberta — antes que a
             navegacao leve a query string embora. Nao renderiza nada. */}
         <Atribuicao />
         {children}
+        {/* A escolha de cookies. Fica depois do conteúdo no DOM: é a última
+            coisa que o leitor de tela encontra, e não atrapalha quem veio ler. */}
+        <Consentimento locale={lang === 'en' ? 'en' : 'pt'} />
         {/* Atalho para o comercial, fixo em todas as paginas publicas. O
             painel administrativo o esconde pelo seu proprio layout: quem esta
             cadastrando barco nao precisa de um botao para falar com vendas. */}

@@ -6,6 +6,7 @@ import { href, type Locale } from '@/i18n/config'
 import { getDict } from '@/i18n/dictionary'
 
 import NerdResolveBadge from './NerdResolveBadge'
+import BotaoPreferencias from './BotaoPreferencias'
 /* Columns follow the design system's SiteFooter: Fleet / Company / Support. */
 
 
@@ -148,6 +149,9 @@ export default async function SiteFooter({ locale = 'pt' }: { locale?: Locale } 
             <Link prefetch={false} href={href('qualidade', locale)} className="inline-flex min-h-11 items-center transition-colors hover:text-pearl-0">
               {t.footer.quality}
             </Link>
+            <span aria-hidden>·</span>
+            {/* Revogar o consentimento precisa ser tão fácil quanto dá-lo. */}
+            <BotaoPreferencias locale={locale} />
           </span>
         </div>
       </div>

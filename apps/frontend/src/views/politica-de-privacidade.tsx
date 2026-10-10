@@ -33,12 +33,6 @@ export default function PoliticaDePrivacidadeView({ locale }: { locale: Locale }
           ],
         },
         {
-          title: 'Newsletter',
-          body: [
-            'O formulário de newsletter envia o endereço de e-mail, que armazenamos para enviar campanhas de e-mail marketing. Ao assinar a newsletter, você nos permite enviar e-mails informativos e de ofertas.',
-          ],
-        },
-        {
           title: 'Cookies',
           body: [
             'Utilizamos cookies, pequenos arquivos de texto que sites armazenam no seu navegador para salvar preferências e configurações. Quando você acessa o site novamente, seu navegador envia esse arquivo, e suas preferências são aplicadas automaticamente.',
@@ -56,7 +50,10 @@ export default function PoliticaDePrivacidadeView({ locale }: { locale: Locale }
         },
         {
           title: 'Com quem partilhamos seus dados',
-          body: ['Não compartilhamos seus dados com terceiros.'],
+          body: [
+            'Não vendemos nem cedemos seus dados de contato a terceiros. As mensagens enviadas pelos formulários ficam com a equipe da Coral e com o provedor de e-mail que usamos para recebê-las.',
+            'Se você autorizar os cookies de medição, o Google (Analytics e Ads) e a Meta recebem dados de navegação — páginas vistas, origem da visita e identificador do clique de anúncio — para medir o desempenho das campanhas. Esse tratamento envolve transferência internacional, já que os servidores dessas empresas ficam fora do Brasil. Recusar não limita nada do que o site oferece, e você pode mudar a escolha a qualquer momento pelo link "Preferências de cookies" no rodapé.',
+          ],
         },
         {
           title: 'Quais os seus direitos sobre seus dados',
@@ -92,12 +89,6 @@ export default function PoliticaDePrivacidadeView({ locale }: { locale: Locale }
           ],
         },
         {
-          title: 'Newsletter',
-          body: [
-            'The newsletter form submits your e-mail address, which we store in order to send e-mail marketing campaigns. By subscribing to the newsletter, you allow us to send you news and offers.',
-          ],
-        },
-        {
           title: 'Cookies',
           body: [
             'We use cookies, small text files that websites store in your browser to save preferences and settings. When you return to the site, your browser sends this file back and your preferences are applied automatically.',
@@ -115,7 +106,10 @@ export default function PoliticaDePrivacidadeView({ locale }: { locale: Locale }
         },
         {
           title: 'Who we share your data with',
-          body: ['We do not share your data with third parties.'],
+          body: [
+            'We neither sell nor transfer your contact details to third parties. Messages sent through the forms stay with the Coral team and the e-mail provider we use to receive them.',
+            'If you allow measurement cookies, Google (Analytics and Ads) and Meta receive browsing data — pages viewed, visit source and ad click identifier — to measure campaign performance. This involves an international transfer, as those servers sit outside Brazil. Declining limits nothing the site offers, and you can change your choice at any time through the "Cookie preferences" link in the footer.',
+          ],
         },
         {
           title: 'What rights you have over your data',
