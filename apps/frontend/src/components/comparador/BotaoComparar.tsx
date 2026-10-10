@@ -72,8 +72,22 @@ export default function BotaoComparar({
             aria-haspopup="listbox"
             title={rotulo}
             /* Marcado, troca para o aqua solido: o estado precisa ler sobre a
-               foto, onde uma mudanca so de opacidade some. */
-            className={`absolute right-2.5 top-2.5 z-10 ${
+               foto, onde uma mudanca so de opacidade some.
+
+               `right-14` no celular afasta o botao da faixa vertical onde o
+               flutuante do WhatsApp passa. Medido na lista de modelos: em 16%
+               das posicoes de rolagem algum "Comparar" ficava sob ele e
+               deixava de responder ao toque — os dois ocupavam quase a mesma
+               coluna (x 315..359 contra 314..370).
+
+               `z-index` nao resolveria: o flutuante e `fixed` e vive na
+               propria pilha. Mover o flutuante tambem nao, porque os cartoes
+               rolam e qualquer posicao fixa dele cruza algum deles em alguma
+               parada.
+
+               De `sm` para cima o botao volta ao canto: la o flutuante fica
+               longe das colunas de cartoes. */
+            className={`absolute right-14 top-2.5 z-10 sm:right-2.5 ${
               aberto ? '!bg-aqua-500 !text-navy-900' : ''
             }`}
           >
