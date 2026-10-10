@@ -133,7 +133,12 @@ export default async function ModelosView({
                   key={f.key}
                   href={href('modelos', locale, f.key === 'todos' ? '' : `?tipo=${f.key}`)}
                   aria-current={on ? 'true' : undefined}
-                  className={`-mb-px border-b-2 px-4 py-4 font-body text-xs font-bold uppercase tracking-[var(--tracking-wide)] transition-colors first:pl-0 ${
+                  /* `min-w-11` porque `first:pl-0` tira o padding esquerdo da
+                     primeira aba, e ai a largura vira so o texto. Em ingles
+                     "All" tem tres letras e dava 42px — abaixo dos 44 que as
+                     WCAG pedem para o dedo. Em portugues "Todos" passava por
+                     ter duas letras a mais, o que e sorte, nao projeto. */
+                  className={`-mb-px inline-flex min-w-11 items-center justify-center border-b-2 px-4 py-4 font-body text-xs font-bold uppercase tracking-[var(--tracking-wide)] transition-colors first:pl-0 ${
                     on
                       ? 'border-aqua-500 text-[var(--text-strong)]'
                       : 'border-transparent text-[var(--text-muted)] hover:text-[var(--text-strong)]'

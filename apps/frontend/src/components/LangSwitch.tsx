@@ -80,7 +80,10 @@ export default function LangSwitch({ current }: { current: Locale }) {
             // `px-1.5` ate `xl`: entre 1024 e 1280px a navbar desktop fica no
             // limite do container, e o respiro lateral daqui e o que sobra
             // para cortar sem encolher fonte nem esconder o rotulo BR/US.
-            className={`flex min-h-11 items-center gap-1.5 rounded-[var(--radius-xs)] px-1.5 py-2 transition-all duration-[140ms] xl:px-2.5 ${
+            /* `min-w-11` alem do `min-h-11`: escondendo o rotulo abaixo de
+               360px, sobrava so a bandeira de 19px e o alvo caia para 31px de
+               largura — alto o bastante para o dedo, estreito demais. */
+            className={`flex min-h-11 min-w-11 items-center justify-center gap-1.5 rounded-[var(--radius-xs)] px-1.5 py-2 transition-all duration-[140ms] xl:px-2.5 ${
               active
                 ? 'bg-white/12 opacity-100'
                 : // 45% rebaixava o branco a #777980 = 4.49:1, um fio abaixo do
