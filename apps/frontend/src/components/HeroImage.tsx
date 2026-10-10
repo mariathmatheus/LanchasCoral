@@ -11,14 +11,28 @@ import Image from 'next/image'
  *  - retrato (1170x2000) no celular, onde o hero é bem mais alto que largo;
  *  - paisagem (2560x1707) a partir de `sm`.
  *
- * A troca é feita com DUAS `next/image` alternadas por CSS, e não com um
- * `<picture>` de vários `<source>`. O motivo é medido: dentro de `<picture>` o
- * Chrome nunca registrava a foto como candidata a LCP — o trace mostrava zero
- * candidatos e oito invalidações, e o Lighthouse caía em `NO_LCP`. Com o
- * `<img>` que o `next/image` emite, o candidato aparece normalmente.
+ * A troca é feita com DUAS `next/image` alternadas por CSS. O custo é uma tag
+ * a mais no HTML, e só a visível é baixada — mas isso depende de NÃO haver
+ * preload, e é a parte que estava errada.
  *
- * O custo é uma tag a mais no HTML; só uma das duas é baixada, porque
- * `display: none` impede a busca e os `sizes` declaram larguras diferentes.
+ * ## Por que não há `priority` aqui
+ *
+ * `priority` injeta um `<link rel="preload">` no `<head>`. O preload é
+ * processado antes de qualquer layout e ignora CSS, então `sm:hidden` não o
+ * alcança: as duas fotos eram baixadas em todo aparelho. Medido num Pixel 5
+ * em 4G lento — retrato 77KB e paisagem 42KB, as duas, sempre.
+ *
+ * A documentação do Next 16 desaconselha preload exatamente neste caso
+ * ("quando várias imagens podem ser o elemento de LCP dependendo do
+ * viewport") e recomenda `fetchPriority` no lugar. O `priority` em si está
+ * deprecado desde o Next 16.
+ *
+ * Sem preload, o `loading="lazy"` padrão resolve: o navegador vê que o
+ * elemento oculto nunca entra no viewport e não busca o arquivo. Não troque
+ * por `loading="eager"` — isso traz o download duplo de volta.
+ *
+ * `fetchPriority="high"` continua: ele prioriza a imagem na fila da rede sem
+ * criar preload, que é exatamente o que se quer.
  *
  * Os arquivos são gerados por `audit/gerar-hero.mjs`.
  */
@@ -33,7 +47,6 @@ export default function HeroImage({ alt = '', className = '' }: { alt?: string; 
         src={RETRATO}
         alt={alt}
         fill
-        priority
         fetchPriority="high"
         quality={72}
         sizes="100vw"
@@ -44,7 +57,6 @@ export default function HeroImage({ alt = '', className = '' }: { alt?: string; 
         src={PAISAGEM}
         alt={alt}
         fill
-        priority
         fetchPriority="high"
         quality={72}
         sizes="100vw"
