@@ -186,8 +186,18 @@ export async function submitInquiry(
       // Responder fala com quem escreveu, sem copiar o endereço à mão.
       responderPara: data.email,
     })
-  } catch {
-    // A solicitação está gravada e aparece no painel de qualquer forma.
+  } catch (erro) {
+    /* A solicitação está gravada e aparece no painel de qualquer forma, então
+       o visitante não vê erro nenhum — avisar por e-mail é conveniência.
+
+       Mas o silêncio total escondia o problema de quem precisa saber: numa
+       conferência do roteamento não havia como distinguir "o e-mail chegou"
+       de "o envio falhou e ninguém soube". Registrar no log não muda o que o
+       visitante vê e dá o rastro quando a caixa não recebe. */
+    console.error(
+      `[contato] aviso por e-mail falhou (tipo ${data.kind}, registro ${criado.id}):`,
+      erro instanceof Error ? erro.message : erro,
+    )
   }
 
   return { ok: true, message: 'Recebemos seu contato. Nossa equipe responde em breve.' }
