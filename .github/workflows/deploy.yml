@@ -168,7 +168,27 @@ jobs:
             # Daí os três passos: o compose gera a definição do build, o bake
             # constrói com a permissão, e o up apenas sobe a imagem pronta.
             docker compose --env-file .env -f infra/docker-compose.yml build --print > /tmp/coral-bake.json
-            docker buildx bake -f /tmp/coral-bake.json --allow=network.host --set '*.output=type=docker'
+
+            # Duas tentativas. O build baixa as fontes do Google (next/font as
+            # hospeda localmente, mas precisa busca-las uma vez) e um soluco de
+            # rede ali derruba o deploy inteiro com "Module not found: Can't
+            # resolve '@vercel/turbopack-next/internal/font/google/font'".
+            #
+            # Aconteceu: um commit que so mudava um numero no CSS falhou, e o
+            # mesmo codigo publicou sem alteracao nenhuma na tentativa
+            # seguinte. Um deploy que falha por motivo que some sozinho ensina
+            # a ignorar falhas de deploy, que e o habito mais caro possivel.
+            #
+            # Se falhar duas vezes, ai e problema de verdade e o job para.
+            for tentativa in 1 2; do
+              if docker buildx bake -f /tmp/coral-bake.json --allow=network.host --set '*.output=type=docker'; then
+                break
+              fi
+              [ "$tentativa" = "2" ] && { echo "::error::build falhou nas duas tentativas"; exit 1; }
+              echo "build falhou; repetindo em 15s"
+              sleep 15
+            done
+
             docker compose --env-file .env -f infra/docker-compose.yml up -d --no-build
             echo "::endgroup::"
 
