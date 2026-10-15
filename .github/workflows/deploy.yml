@@ -247,6 +247,24 @@ jobs:
             # servidor pequeno, derrubam o próximo deploy por falta de espaço.
             docker image prune -f --filter "until=168h" >/dev/null 2>&1 || true
 
+            # O cache de camadas do buildx NÃO é tocado pelo `image prune`, e
+            # cresce muito mais rápido: cinco dias de publicações deixaram 33GB
+            # num disco de 56GB — 83% ocupado, a caminho de derrubar o próprio
+            # deploy que o criou.
+            #
+            # `-af` sem filtro de tempo: o cache util e o da imagem que acabou
+            # de subir, e ela ja esta construida. O proximo build reconstroi as
+            # camadas do zero e leva alguns minutos a mais — barato, perto de
+            # um deploy que falha por disco cheio.
+            #
+            # Depois do `up`, nunca antes: durante o build o cache e o que
+            # torna a reconstrucao rapida.
+            docker builder prune -af >/dev/null 2>&1 || true
+
+            # Deixa o tamanho no log: um disco que encosta em 80% vira aviso
+            # antes de virar incidente.
+            df -h / | awk 'NR==2 {print "disco: " $5 " usado, " $4 " livre"}'
+
   conferir:
     name: Conferir no ar
     needs: publicar
