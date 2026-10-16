@@ -11,6 +11,7 @@ import EquipmentPanels from '@/components/EquipmentPanels'
 import SiteHeader from '@/components/SiteHeader'
 import ShareButton from '@/components/ShareButton'
 import QuoteDialog from '@/components/QuoteDialog'
+import ManualDialog from '@/components/ManualDialog'
 import BotaoComparar from '@/components/comparador/BotaoComparar'
 import BoatCard from '@/components/BoatCard'
 import Reveal from '@/components/Reveal'
@@ -176,19 +177,21 @@ export default async function BoatView({ slug, locale }: { slug: string; locale:
               <Button href="#ficha-tecnica" variant="outline-inverse" size="md">
                 {t.specsCta}
               </Button>
-              {/* `download` baixa o arquivo em vez de abrir no leitor embutido;
-                  `target` serve de saida se o navegador ignorar o atributo. */}
               {boat.manualUrl && (
-                <a
-                  href={boat.manualUrl}
-                  download
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="btn-press inline-flex min-h-11 items-center gap-2 whitespace-nowrap rounded-[var(--radius-pill)] border border-[var(--border-on-dark-strong)] px-5 font-body text-xs font-bold uppercase tracking-[var(--tracking-wide)] text-pearl-0 hover:border-aqua-500 hover:text-aqua-500"
+                <ManualDialog
+                  locale={locale}
+                  boatSlug={boat.slug}
+                  boatLabel={label}
+                  manualUrl={boat.manualUrl}
                 >
-                  <IconDownload size={15} />
-                  {t.manualCta}
-                </a>
+                  <a
+                    href={boat.manualUrl}
+                    className="btn-press inline-flex min-h-11 items-center gap-2 whitespace-nowrap rounded-[var(--radius-pill)] border border-[var(--border-on-dark-strong)] px-5 font-body text-xs font-bold uppercase tracking-[var(--tracking-wide)] text-pearl-0 hover:border-aqua-500 hover:text-aqua-500"
+                  >
+                    <IconDownload size={15} />
+                    {t.manualCta}
+                  </a>
+                </ManualDialog>
               )}
               <BotaoComparar
                 locale={locale}
