@@ -8,7 +8,6 @@ import type { ReactNode } from 'react'
 import { submitInquiry, type ContactState } from '@/app/(pt)/contato/actions'
 import { lerAtribuicao } from '@/components/Atribuicao'
 import { IconButton, SubmitButton } from '@/components/ui'
-import { IconDownload } from '@/components/icons'
 import { getDict } from '@/i18n/dictionary'
 import type { Locale } from '@/i18n/config'
 
