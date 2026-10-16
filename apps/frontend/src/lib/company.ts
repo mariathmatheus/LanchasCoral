@@ -59,9 +59,9 @@ export const COMPANY = {
     hullsBuilt: 'mais de 3.000',
     plantAreaM2: 6000,
     /* Duas garantias distintas, confirmadas pelo cliente:
-       estrutural (casco) 10 anos; componentes/geral 2 anos. */
+       estrutural (casco) 10 anos; componentes/geral 1 ano. */
     warrantyStructural: '10 anos',
-    warrantyComponents: '2 anos',
+    warrantyComponents: '1 ano',
   },
 
   /**

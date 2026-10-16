@@ -65,7 +65,7 @@ const DICT = {
         },
         {
           title: 'Garantia',
-          body: 'Dez anos de garantia estrutural e dois anos de cobertura total dos componentes, com central de atendimento e estoque de reposição próprios.',
+          body: 'Dez anos de garantia estrutural e um ano de cobertura total dos componentes, com central de atendimento e estoque de reposição próprios.',
         },
       ],
       diferenciais: [
@@ -73,7 +73,6 @@ const DICT = {
         'Skin Coat com resina especial',
         'Pigmentação em gel coat',
         'Construção monobloco',
-        'Infusão a vácuo (a partir de 38 pés)',
       ],
     },
     models: {
@@ -366,7 +365,7 @@ const DICT = {
       whyEyebrow: 'Quality and trust',
       whyTitle: 'How we build.',
       yardEyebrow: 'How we build',
-      yardTitle: 'Wood Free, monocoque hull, vacuum infusion from 38 feet.',
+      yardTitle: 'Wood Free, monocoque hull.',
       yardLede:
         'Wood Free construction: no timber anywhere in the structure. Solid bottom with floors and stringers in a single monocoque, finished in isophthalic gel-coat.',
       statHulls: 'Boats built',
@@ -392,7 +391,7 @@ const DICT = {
         },
         {
           title: 'Warranty',
-          body: 'Ten years of structural warranty and two years of full component cover, backed by an in-house service centre and parts stock.',
+          body: 'Ten years of structural warranty and one year of full component cover, backed by an in-house service centre and parts stock.',
         },
       ],
       diferenciais: [
@@ -400,7 +399,6 @@ const DICT = {
         'Skin Coat with special resin',
         'Gel coat pigmentation',
         'Monocoque construction',
-        'Vacuum infusion (from 38 feet)',
       ],
     },
     models: {

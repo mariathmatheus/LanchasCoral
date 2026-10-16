@@ -54,7 +54,6 @@ export default async function SobreView({ locale }: { locale: Locale }) {
         'Temos como prioridade a saúde e a segurança dos nossos clientes e colaboradores, buscando sempre manter o equilíbrio entre o desenvolvimento de produtos e a preservação do meio ambiente.',
         'Possui sistema wood free, que consiste na não utilização de madeira estrutural na fabricação. Outro ponto a se destacar é a utilização de camadas de resina especial para o Skin Coat, que reduz a absorção de umidade no casco. Não são realizadas pinturas automotivas nas embarcações: toda pigmentação é aplicada na cor determinada pelo comprador, em gel coat no início da industrialização, aumentando a resistência em 100 vezes comparado com a pintura tradicional, além de oferecer uma vida útil muito maior.',
         'Conforme normas internacionais, são utilizadas mantas, tecidos biaxiais, reforços com Divinycell, Renicell e Coremat na laminação. Todas as embarcações são industrializadas no sistema monobloco, ou seja, após a pré-montagem, o casco e o convés são soldados, proporcionando maior resistência, durabilidade e menos ruído na navegação.',
-        'Nas versões a partir de 38 pés é aplicado o processo de laminação por infusão a vácuo, atualmente considerado o processo mais inovador da indústria náutica, utilizado para construção de barcos de alta performance e qualidade: produz uma leveza estrutural e um grau extra de resistência.',
       ],
       whyEyebrow: 'Por que uma Coral?',
       whyTitle: 'O que o estaleiro entrega.',
@@ -77,7 +76,7 @@ export default async function SobreView({ locale }: { locale: Locale }) {
       serviceEyebrow: 'Serviço e garantia',
       serviceTitle: 'A Coral resolve.',
       servico: [
-        'A Coral oferece 10 anos de garantia estrutural e 2 anos de garantia total dos componentes, a única no mercado com esta prática.',
+        'A Coral oferece 10 anos de garantia estrutural e 1 ano de garantia total dos componentes, a única no mercado com esta prática.',
         'Possui uma central de atendimento para os registros das chamadas e equipes próprias especializadas para realizar atendimentos, de baixa à alta complexidade. Além de possuir estoque de reposição imediata das principais peças, reduzindo assim o intervalo de conclusão dos atendimentos.',
         'O estaleiro adicionalmente realiza atendimentos extras para reparos e revitalizações de embarcações diversas, oferecendo serviço de qualidade, a preço justo.',
       ],
@@ -119,7 +118,6 @@ export default async function SobreView({ locale }: { locale: Locale }) {
         'The health and safety of our clients and our people come first, and we hold the balance between developing new product and protecting the environment around us.',
         'The yard is wood free: no structural timber goes into any build. Special resin layers in the Skin Coat reduce moisture absorption in the hull. We apply no automotive paint to our boats. Every pigment is laid down in gel coat, in the colour the owner specifies, at the very start of the build. The result is a hundred times more resistant than conventional paint, and lasts far longer.',
         'In line with international standards, lamination uses chopped strand mat, biaxial fabrics and Divinycell, Renicell and Coremat reinforcement. Every boat is built as a monocoque: after pre-assembly, hull and deck are bonded into one, for greater strength, longer life and less noise under way.',
-        'From 38 feet up, the hull is laminated by vacuum infusion, the most advanced process in the industry today, used for high-performance, high-quality builds. It yields a lighter structure and an extra measure of strength.',
       ],
       whyEyebrow: 'Why a Coral?',
       whyTitle: 'What the yard delivers.',
@@ -140,7 +138,7 @@ export default async function SobreView({ locale }: { locale: Locale }) {
       serviceEyebrow: 'Service and warranty',
       serviceTitle: 'Coral takes care of it.',
       servico: [
-        'Coral offers a 10-year structural warranty and 2 years of full component cover, the only yard in the market to do so.',
+        'Coral offers a 10-year structural warranty and 1 year of full component cover, the only yard in the market to do so.',
         'A dedicated service desk logs every call, and our own specialist teams handle the work, from routine jobs to the most complex. We hold immediate replacement stock of the principal parts, which keeps turnaround times short.',
         'The yard also takes on repair and refit work for boats of other makes, with quality workmanship at a fair price.',
       ],
