@@ -38,7 +38,7 @@ export default async function SobreView({ locale }: { locale: Locale }) {
           ano: '1990',
           titulo: 'Um estaleiro nasce no Rio',
           texto:
-            'A Coral surge como estaleiro 100% brasileiro, na região metropolitana do Rio de Janeiro. A operação começa pequena, e o nome ainda não circula fora do meio náutico.',
+            'A Coral surge como estaleiro 100% brasileiro, na região metropolitana do Rio de Janeiro.',
         },
         {
           ano: 'Primeiros anos',
