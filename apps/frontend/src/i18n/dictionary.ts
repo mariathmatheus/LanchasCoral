@@ -39,7 +39,7 @@ const DICT = {
       whyEyebrow: 'Qualidade e confiança',
       whyTitle: 'Como nós fabricamos.',
       yardEyebrow: 'Como nós fabricamos',
-      yardTitle: 'Wood Free, casco monobloco, infusão a vácuo nos 38+.',
+      yardTitle: 'Wood Free, casco monobloco, infusão a vácuo.',
       yardLede:
         'Construção Wood Free: nenhuma madeira na estrutura. O fundo é maciço, com hastilhas e longarinas em monobloco, e o acabamento leva gel-coat isoftálico.',
       statHulls: 'Embarcações produzidas',

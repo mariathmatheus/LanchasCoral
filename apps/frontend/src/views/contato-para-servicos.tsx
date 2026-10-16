@@ -11,7 +11,6 @@ export default function ContatoParaServicosView({ locale }: { locale: Locale }) 
       servicesTitle: 'Serviços disponíveis',
       /* Serviços oferecidos no formulário do site legado, na íntegra. */
       services: [
-        'Extensão da plataforma de popa',
         'Hard Top (HT)',
         'Plataforma hidráulica submersível',
         'Plataforma mecânica em inox – WetDeck',
@@ -30,7 +29,6 @@ export default function ContatoParaServicosView({ locale }: { locale: Locale }) 
       lede: 'From minor repairs to a full refit, with specialist craftsmen and genuine parts.',
       servicesTitle: 'Services available',
       services: [
-        'Swim platform extension',
         'Hard Top (HT)',
         'Submersible hydraulic platform',
         'Stainless steel mechanical platform – WetDeck',
