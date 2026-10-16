@@ -50,7 +50,7 @@ function ManualForm({
   boatSlug: string
   manualUrl: string
   locale: Locale
-  onSuccess: () => void
+  onSuccess: () => (() => void) | void
 }) {
   const t = getDict(locale)
   const tf = t.form
@@ -76,7 +76,7 @@ function ManualForm({
     document.body.appendChild(a)
     a.click()
     document.body.removeChild(a)
-    onSuccess()
+    return onSuccess()
   }, [state.ok, manualUrl, onSuccess])
 
   if (state.ok) {
@@ -238,11 +238,8 @@ export default function ManualDialog({
                     id={titleId}
                     className="mt-2 font-display text-2xl font-semibold tracking-[var(--tracking-display)] text-[var(--text-strong)]"
                   >
-                    {t.boat.manualDialogTitle}
+                    {`${t.boat.manualDialogTitle} — ${boatLabel}`}
                   </h2>
-                  <p className="mt-2 text-[15px] leading-[1.6] text-[var(--color-text-body)]">
-                    {boatLabel}
-                  </p>
                 </div>
 
                 <IconButton
@@ -262,9 +259,8 @@ export default function ManualDialog({
                   manualUrl={manualUrl}
                   locale={locale}
                   onSuccess={() => {
-                    // Mantém o modal aberto para mostrar a mensagem de sucesso
-                    // por 2 s antes de fechar.
-                    window.setTimeout(() => setOpen(false), 2000)
+                    const tid = window.setTimeout(() => setOpen(false), 2000)
+                    return () => window.clearTimeout(tid)
                   }}
                 />
               </div>
