@@ -13,13 +13,17 @@ import { usePathname } from 'next/navigation'
 type Item = { href: string; label: string }
 
 const ITEMS: Item[] = [
-  { href: '/admin', label: 'Modelos' },
-  { href: '/admin/listings', label: 'Seminovos' },
+  { href: '/pmpv-td9u-gebz', label: 'Modelos' },
+  { href: '/pmpv-td9u-gebz/listings', label: 'Seminovos' },
   /* "Mensagens" e não "Contatos": desde que os pontos focais viraram tela
      própria, dois itens chamados Contatos confundiriam o operador. */
-  { href: '/admin/inquiries', label: 'Mensagens' },
-  { href: '/admin/contatos', label: 'Contatos' },
-  { href: '/admin/email', label: 'E-mail' },
+  { href: '/pmpv-td9u-gebz/inquiries', label: 'Mensagens' },
+  { href: '/pmpv-td9u-gebz/contatos', label: 'Contatos' },
+  { href: '/pmpv-td9u-gebz/email', label: 'E-mail' },
+]
+
+const ROOT_ITEMS: Item[] = [
+  { href: '/pmpv-td9u-gebz/usuarios', label: 'Usuários' },
 ]
 
 /**
@@ -27,12 +31,13 @@ const ITEMS: Item[] = [
  * todas as rotas do painel, que é justamente o problema que queremos evitar.
  */
 function isActive(pathname: string, href: string) {
-  if (href === '/admin') return pathname === '/admin' || pathname.startsWith('/admin/boats')
+  if (href === '/pmpv-td9u-gebz') return pathname === '/pmpv-td9u-gebz' || pathname.startsWith('/pmpv-td9u-gebz/boats')
   return pathname === href || pathname.startsWith(`${href}/`)
 }
 
-export default function AdminNav() {
+export default function AdminNav({ role }: { role?: string }) {
   const pathname = usePathname() ?? ''
+  const items = role === 'ROOT' ? [...ITEMS, ...ROOT_ITEMS] : ITEMS
 
   // `-mx-1 px-1`: a rolagem sobra ate a borda da tela quando os rotulos nao
   // cabem, em vez de cortar o ultimo item contra a caixa. Em telas estreitas
@@ -42,7 +47,7 @@ export default function AdminNav() {
       aria-label="Seções do painel"
       className="-mx-1 flex items-center gap-0.5 overflow-x-auto px-1 sm:gap-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
     >
-      {ITEMS.map((item) => {
+      {items.map((item) => {
         const active = isActive(pathname, item.href)
         return (
           <Link

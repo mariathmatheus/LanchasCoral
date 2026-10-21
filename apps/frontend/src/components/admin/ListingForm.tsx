@@ -6,7 +6,7 @@ import { Field, TextArea, Section, controlCls, labelCls } from './Field'
 import { primaryBtnCls } from './Shell'
 import { ImagesField, AccessoriesField, type ImageRow, type AccessoryRow } from './Repeaters'
 import { TIPOS_DE_MOTOR } from '@/lib/listing-schema'
-import type { ActionState } from '@/app/(pt)/admin/listing-actions'
+import type { ActionState } from '@/app/(pt)/pmpv-td9u-gebz/listing-actions'
 
 export type ListingFormValues = {
   id?: string
@@ -233,7 +233,7 @@ export default function ListingForm({ action, values: v, submitLabel }: Props) {
       </Section>
 
       <div className="sticky bottom-0 z-10 -mx-1 flex items-center justify-between gap-4 border-t border-[var(--border-subtle)] bg-[var(--surface-page)]/92 px-1 py-4 backdrop-blur">
-        <Link href="/admin/listings" className="text-sm font-medium text-[var(--text-muted)] transition-colors duration-[140ms] hover:text-[var(--text-strong)]">
+        <Link href="/pmpv-td9u-gebz/listings" className="text-sm font-medium text-[var(--text-muted)] transition-colors duration-[140ms] hover:text-[var(--text-strong)]">
           Cancelar
         </Link>
         <button

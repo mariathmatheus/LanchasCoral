@@ -4,7 +4,7 @@ import { useActionState, useState } from 'react'
 import { Field, Section, controlCls, labelCls } from './Field'
 import { primaryBtnCls } from './Shell'
 import { MARCA_SENHA_GUARDADA } from '@/lib/email/marcas'
-import { salvarConfigEmail, testarConexao, type MailState } from '@/app/(pt)/admin/mail-actions'
+import { salvarConfigEmail, testarConexao, type MailState } from '@/app/(pt)/pmpv-td9u-gebz/mail-actions'
 
 export type ConfigValores = {
   host: string | null

@@ -1,7 +1,7 @@
 'use client'
 
 import { useActionState } from 'react'
-import { bloquearDominio, desbloquearDominio, type MailState } from '@/app/(pt)/admin/mail-actions'
+import { bloquearDominio, desbloquearDominio, type MailState } from '@/app/(pt)/pmpv-td9u-gebz/mail-actions'
 import { controlCls, labelCls } from './Field'
 
 export type DominioNegado = {

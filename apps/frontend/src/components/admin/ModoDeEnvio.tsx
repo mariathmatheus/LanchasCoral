@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useFormStatus } from 'react-dom'
-import { alternarEnvioAutomatico } from '@/app/(pt)/admin/mail-actions'
+import { alternarEnvioAutomatico } from '@/app/(pt)/pmpv-td9u-gebz/mail-actions'
 
 /**
  * Alterna entre aprovar cada envio e enviar tudo sozinho.

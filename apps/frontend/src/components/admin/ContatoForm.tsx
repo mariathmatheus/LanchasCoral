@@ -3,7 +3,7 @@
 import { useActionState, useState } from 'react'
 import { Field, Section } from './Field'
 import { primaryBtnCls } from './Shell'
-import { salvarContato, type ActionState } from '@/app/(pt)/admin/contact-actions'
+import { salvarContato, type ActionState } from '@/app/(pt)/pmpv-td9u-gebz/contact-actions'
 
 export type ContatoValores = {
   key: string

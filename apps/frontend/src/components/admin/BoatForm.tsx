@@ -12,7 +12,7 @@ import {
   type EquipRow,
   type PerfRow,
 } from './Repeaters'
-import type { ActionState } from '@/app/(pt)/admin/boat-actions'
+import type { ActionState } from '@/app/(pt)/pmpv-td9u-gebz/boat-actions'
 
 export type BoatFormValues = {
   id?: string
@@ -258,7 +258,7 @@ export default function BoatForm({ action, values: v, families, submitLabel }: P
       </Section>
 
       <div className="sticky bottom-0 z-10 -mx-1 flex items-center justify-between gap-4 border-t border-[var(--border-subtle)] bg-[var(--surface-page)]/92 px-1 py-4 backdrop-blur">
-        <Link href="/admin" className="text-sm font-medium text-[var(--text-muted)] transition-colors duration-[140ms] hover:text-[var(--text-strong)]">
+        <Link href='/pmpv-td9u-gebz' className="text-sm font-medium text-[var(--text-muted)] transition-colors duration-[140ms] hover:text-[var(--text-strong)]">
           Cancelar
         </Link>
         <button

@@ -100,18 +100,34 @@ model Equipment {
   @@index([boatId, panel, order])
 }
 
+enum Role {
+  ROOT
+  ADMIN
+  VIEWER
+}
+
 model User {
   id           String   @id @default(cuid())
   email        String   @unique
   name         String?
   passwordHash String
 
-  /// Só "ADMIN" abre o painel (ver requireAdmin em src/lib/auth.ts).
-  /// O padrão é o papel sem poder: um usuário criado sem que alguém decida
-  /// o papel dele não deve nascer podendo apagar modelos e ler os contatos
-  /// dos clientes. Quem precisa de acesso recebe ADMIN explicitamente.
-  role         String   @default("VIEWER")
+  /// ROOT: cria e exclui contas, acesso total.
+  /// ADMIN: todas as edições, sem criar/excluir contas.
+  /// VIEWER: sem acesso ao painel.
+  role         Role     @default(VIEWER)
   createdAt    DateTime @default(now())
+}
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
 }
 
 model Session {

@@ -1,68 +1,59 @@
 'use client'
 
-import { useActionState } from 'react'
-import { loginAction } from '../actions'
-import { Logo } from '@/components/ui'
+import { useRef } from 'react'
+import { registrarHoneypot } from '../honeypot-log'
 
-const inputCls =
-  'mt-1.5 w-full rounded-[var(--radius-sm)] border border-[var(--border-subtle)] bg-[var(--surface-card)] px-4 py-2.5 text-sm text-[var(--text-strong)] outline-none transition-colors duration-[140ms] placeholder:text-[var(--text-muted)] hover:border-[var(--border-strong)] focus:border-ocean-700'
+/**
+ * Honeypot: formulário de login falso em /admin.
+ * Parece real mas nunca autentica — só loga o IP e envia alerta.
+ */
+export default function HoneypotLogin() {
+  const ref = useRef<HTMLFormElement>(null)
 
-export default function LoginPage() {
-  const [state, action, pending] = useActionState(loginAction, undefined)
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    const fd = new FormData(ref.current!)
+    // Captura UA do browser para o log
+    fd.set('_ua', navigator.userAgent)
+    await registrarHoneypot(fd)
+    // Simula erro genérico — nunca deixa entrar
+    const err = ref.current?.querySelector('[data-err]') as HTMLElement | null
+    if (err) err.textContent = 'Credenciais inválidas.'
+  }
 
   return (
-    <div className="grid min-h-dvh place-items-center bg-[image:var(--grad-deep)] px-5 py-16">
-      <div className="w-full max-w-sm">
-        <div className="flex justify-center">
-          <Logo variant="white" height={30} priority />
-        </div>
-
-        <div className="mt-8 rounded-[var(--radius-lg)] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-7 shadow-[var(--shadow-lg)]">
-          <h1 className="font-display text-xl font-semibold tracking-[var(--tracking-display)] text-[var(--text-strong)]">
-            Painel administrativo
-          </h1>
-          <p className="mt-1.5 text-sm text-[var(--text-muted)]">
-            Entre para gerenciar os modelos e anúncios.
-          </p>
-
-          <form action={action} className="mt-7 space-y-4">
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-[var(--color-text-body)]">
-                E-mail
-              </label>
-              <input
-                id="email" name="email" type="email" required autoComplete="email"
-                placeholder="voce@coral.com.br"
-                className={inputCls}
-              />
-            </div>
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-[var(--color-text-body)]">
-                Senha
-              </label>
-              <input
-                id="password" name="password" type="password" required autoComplete="current-password"
-                className={inputCls}
-              />
-            </div>
-
-            {state?.error && (
-              <p
-                role="alert"
-                className="rounded-[var(--radius-sm)] border border-danger-500/30 bg-danger-500/10 px-3 py-2 text-sm font-medium text-danger-500"
-              >
-                {state.error}
-              </p>
-            )}
-
-            <button
-              type="submit" disabled={pending}
-              className="btn-press w-full rounded-[var(--radius-pill)] bg-ocean-600 px-4 py-3 text-sm font-semibold text-pearl-0 shadow-[var(--shadow-sm)] hover:bg-ocean-500 active:bg-ocean-700 disabled:opacity-60"
-            >
-              {pending ? 'Entrando…' : 'Entrar'}
-            </button>
-          </form>
-        </div>
+    <div className="flex min-h-screen items-center justify-center bg-[#0a1628] p-4">
+      <div className="w-full max-w-sm rounded-xl bg-white p-8 shadow-xl">
+        <h1 className="mb-6 font-sans text-xl font-semibold text-gray-900">Painel administrativo</h1>
+        <form ref={ref} onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="mb-1 block text-sm font-medium text-gray-700">E-mail</label>
+            <input
+              name="email"
+              type="email"
+              autoComplete="email"
+              required
+              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+            />
+          </div>
+          <div>
+            <label className="mb-1 block text-sm font-medium text-gray-700">Senha</label>
+            <input
+              name="password"
+              type="password"
+              autoComplete="current-password"
+              required
+              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+            />
+          </div>
+          <p data-err className="min-h-[20px] text-sm text-red-600" role="alert" />
+          <button
+            type="submit"
+            className="w-full rounded-lg bg-blue-600 py-2 text-sm font-semibold text-white hover:bg-blue-700"
+          >
+            Entrar
+          </button>
+        </form>
       </div>
     </div>
   )

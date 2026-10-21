@@ -2,7 +2,7 @@
 
 import { useActionState, useState } from 'react'
 import { useFormStatus } from 'react-dom'
-import { enviarMemorial, type EnvioState } from '@/app/(pt)/admin/manual-actions'
+import { enviarMemorial, type EnvioState } from '@/app/(pt)/pmpv-td9u-gebz/manual-actions'
 
 /**
  * Dispara o envio do memorial descritivo para quem pediu.

@@ -3,6 +3,7 @@ import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import bcrypt from 'bcryptjs'
 import { prisma } from './prisma'
+import type { Role } from '@prisma/client'
 
 const COOKIE = 'coral_session'
 const MAX_AGE_DAYS = 7
@@ -18,12 +19,13 @@ const MAX_AGE_DAYS = 7
  */
 const HASH_ISCA = '$2b$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy'
 
+/** Roles com acesso ao painel (ADMIN e ROOT). */
+export const PANEL_ROLES: Role[] = ['ADMIN', 'ROOT']
+
 export async function login(email: string, password: string) {
   const user = await prisma.user.findUnique({ where: { email: email.toLowerCase().trim() } })
   const ok = await bcrypt.compare(password, user?.passwordHash ?? HASH_ISCA)
-  // `role` é conferido aqui também: sem isso um usuário sem permissão passaria
-  // pelo login e só seria barrado depois, sem explicação nenhuma.
-  if (!user || !ok || user.role !== 'ADMIN') return null
+  if (!user || !ok || !PANEL_ROLES.includes(user.role)) return null
 
   const expiresAt = new Date(Date.now() + MAX_AGE_DAYS * 864e5)
   const session = await prisma.session.create({ data: { userId: user.id, expiresAt } })
@@ -66,13 +68,24 @@ export async function currentUser() {
 
 /**
  * Guarda das páginas e actions do painel.
- *
- * Confere o papel, não só a sessão: `User.role` existe no schema e seria uma
- * promessa vazia se qualquer conta autenticada tivesse acesso total — apagar
- * modelos, editar anúncios, ler os contatos dos clientes.
+ * Aceita ROOT e ADMIN. Redireciona para a nova rota de login.
  */
 export async function requireAdmin() {
   const user = await currentUser()
-  if (!user || user.role !== 'ADMIN') redirect('/admin/login')
+  if (!user || !PANEL_ROLES.includes(user.role)) redirect('/pmpv-td9u-gebz/login')
   return user
+}
+
+/**
+ * Guarda das operações exclusivas de ROOT (criar/deletar contas).
+ */
+export async function requireRoot() {
+  const user = await currentUser()
+  if (!user || user.role !== 'ROOT') redirect('/pmpv-td9u-gebz/login')
+  return user
+}
+
+/** Cria hash bcrypt para nova senha. */
+export async function hashSenha(senha: string) {
+  return bcrypt.hash(senha, 12)
 }
