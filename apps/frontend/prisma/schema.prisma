@@ -52,6 +52,9 @@ model Boat {
   performance Json?
 
   published Boolean @default(true)
+  /// Não aparece em listagens nem no menu, mas é acessível por link direto.
+  /// Útil para compartilhar com um cliente pontual antes do lançamento público.
+  unlisted  Boolean @default(false)
   order     Int     @default(0)
   heroImage String?
 
@@ -219,6 +222,8 @@ model Listing {
   sourceUrl   String?
 
   published Boolean @default(true)
+  /// Não aparece em listagens, mas é acessível por link direto.
+  unlisted  Boolean @default(false)
   sold      Boolean @default(false)
   order     Int     @default(0)
 

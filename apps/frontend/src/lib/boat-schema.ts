@@ -40,6 +40,7 @@ export const boatSchema = z.object({
   capOpenSeaDay: optInt, capOpenSeaNight: optInt,
 
   published: z.boolean(),
+  unlisted: z.boolean(),
   order: z.preprocess((v) => (v === '' || v == null ? 0 : Number(v)), z.number().int()),
   // Validada como URL de imagem, e não como texto livre: vai direto para o
   // `next/image`, que responde 400 a qualquer host fora da lista.
@@ -86,10 +87,11 @@ export function parseBoatForm(fd: FormData) {
   }
   const obj: Record<string, unknown> = {}
   for (const [k, v] of fd.entries()) {
-    if (['images', 'equipment', 'performance', 'published'].includes(k)) continue
+    if (['images', 'equipment', 'performance', 'published', 'unlisted'].includes(k)) continue
     obj[k] = v
   }
   obj.published = fd.get('published') === 'on' || fd.get('published') === 'true'
+  obj.unlisted = fd.get('unlisted') === 'on' || fd.get('unlisted') === 'true'
   obj.images = json('images')
   obj.equipment = json('equipment')
   obj.performance = json('performance')

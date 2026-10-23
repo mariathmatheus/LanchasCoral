@@ -119,16 +119,16 @@ export const rowCls =
   'transition-colors duration-[140ms] hover:bg-[var(--surface-sunken)]/60'
 
 /** Pílula de status publicado/rascunho, usada como botão de alternância. */
-export function StatusPill({ published }: { published: boolean }) {
+export function StatusPill({ published, unlisted }: { published: boolean; unlisted?: boolean }) {
+  const label = !published ? 'Rascunho' : unlisted ? 'Não listado' : 'Publicado'
+  const cls = !published
+    ? 'bg-[var(--surface-sunken)] text-[var(--text-muted)] hover:bg-[var(--border-subtle)]'
+    : unlisted
+    ? 'bg-warning-500/15 text-warning-500 hover:bg-warning-500/25'
+    : 'bg-success-500/12 text-[var(--color-success-text)] hover:bg-success-500/20'
   return (
-    <span
-      className={`inline-block rounded-[var(--radius-pill)] px-2.5 py-1 text-xs font-semibold transition-colors duration-[140ms] ${
-        published
-          ? 'bg-success-500/12 text-[var(--color-success-text)] hover:bg-success-500/20'
-          : 'bg-[var(--surface-sunken)] text-[var(--text-muted)] hover:bg-[var(--border-subtle)]'
-      }`}
-    >
-      {published ? 'Publicado' : 'Rascunho'}
+    <span className={`inline-block rounded-[var(--radius-pill)] px-2.5 py-1 text-xs font-semibold transition-colors duration-[140ms] ${cls}`}>
+      {label}
     </span>
   )
 }

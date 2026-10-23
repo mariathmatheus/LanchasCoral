@@ -51,6 +51,7 @@ function scalars(d: ListingInput) {
     heroImage: d.heroImage ?? d.images[0]?.url ?? null,
     sourceUrl: d.sourceUrl ?? null,
     published: d.published,
+    unlisted: d.unlisted,
     sold: d.sold,
     order: d.order,
   }

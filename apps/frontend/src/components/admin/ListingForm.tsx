@@ -29,6 +29,7 @@ export type ListingFormValues = {
   heroImage: string | null
   sourceUrl: string | null
   published: boolean
+  unlisted: boolean
   sold: boolean
   order: number
   images: ImageRow[]
@@ -209,6 +210,15 @@ export default function ListingForm({ action, values: v, submitLabel }: Props) {
                 className="h-4 w-4 rounded-[var(--radius-xs)] border-[var(--border-strong)] accent-[var(--color-ocean-700)]"
               />
               <span className="text-sm font-medium text-[var(--color-text-body)]">Vendido</span>
+            </label>
+            <label className="flex items-center gap-3">
+              <input
+                type="checkbox"
+                name="unlisted"
+                defaultChecked={v.unlisted}
+                className="h-4 w-4 rounded-[var(--radius-xs)] border-[var(--border-strong)] accent-[var(--color-ocean-700)]"
+              />
+              <span className="text-sm font-medium text-[var(--color-text-body)]">Não listado</span>
             </label>
           </div>
         </div>

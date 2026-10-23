@@ -20,18 +20,20 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   if (!l) return {}
 
   const preco = l.priceBrl ? `, ${brl(l.priceBrl)}` : ''
+  const desc = `${l.title}${preco}. Seminovo intermediado pelo Coral Broker.`
   return {
     title: l.title,
-    description: `${l.title}${preco}. Seminovo intermediado pelo Coral Broker.`,
-    alternates: alternates(`/broker/${l.slug}`, `/en/broker/${l.slug}`),
-    openGraph: ogDeProduto({
+    description: desc,
+    robots: l.unlisted ? { index: false, follow: false } : undefined,
+    alternates: l.unlisted ? undefined : alternates(`/broker/${l.slug}`, `/en/broker/${l.slug}`),
+    openGraph: l.unlisted ? undefined : ogDeProduto({
       titulo: l.title,
-      descricao: `${l.title}${preco}. Seminovo intermediado pelo Coral Broker.`,
+      descricao: desc,
       url: `/broker/${l.slug}`,
       imagem: `/broker/${l.slug}/og`,
       locale: 'pt_BR',
     }),
-    twitter: { card: 'summary_large_image', images: [`/broker/${l.slug}/og`] },
+    twitter: l.unlisted ? undefined : { card: 'summary_large_image', images: [`/broker/${l.slug}/og`] },
   }
 }
 

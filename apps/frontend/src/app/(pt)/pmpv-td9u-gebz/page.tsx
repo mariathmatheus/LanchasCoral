@@ -24,7 +24,8 @@ export default async function AdminBoatsPage() {
     include: { family: true, _count: { select: { images: true, equipment: true } } },
   })
 
-  const published = boats.filter((b) => b.published).length
+  const published = boats.filter((b) => b.published && !b.unlisted).length
+  const unlisted = boats.filter((b) => b.published && b.unlisted).length
 
   return (
     <>
@@ -33,7 +34,7 @@ export default async function AdminBoatsPage() {
         count={
           boats.length === 0
             ? 'Nenhum modelo cadastrado.'
-            : `${boats.length} ${boats.length === 1 ? 'modelo' : 'modelos'} · ${published} publicados`
+            : `${boats.length} ${boats.length === 1 ? 'modelo' : 'modelos'} · ${published} publicados${unlisted ? ` · ${unlisted} não listados` : ''}`
         }
         action={{ href: '/pmpv-td9u-gebz/boats/new', label: '+ Novo modelo' }}
       />
@@ -102,12 +103,14 @@ export default async function AdminBoatsPage() {
                           <input type="hidden" name="id" value={b.id} />
                           <button
                             title={
-                              b.published
-                                ? 'Publicado. Clique para voltar a rascunho'
-                                : 'Rascunho. Clique para publicar'
+                              !b.published
+                                ? 'Rascunho. Clique para publicar'
+                                : b.unlisted
+                                ? 'Não listado. Clique para voltar a rascunho'
+                                : 'Publicado. Clique para voltar a rascunho'
                             }
                           >
-                            <StatusPill published={b.published} />
+                            <StatusPill published={b.published} unlisted={b.unlisted} />
                           </button>
                         </form>
                       </td>

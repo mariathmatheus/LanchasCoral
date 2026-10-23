@@ -38,7 +38,8 @@ export default async function AdminListingsPage({
     include: { _count: { select: { images: true, accessories: true } } },
   })
 
-  const published = listings.filter((l) => l.published).length
+  const published = listings.filter((l) => l.published && !l.unlisted).length
+  const unlisted = listings.filter((l) => l.published && l.unlisted).length
 
   return (
     <>
@@ -47,7 +48,7 @@ export default async function AdminListingsPage({
         count={
           listings.length === 0
             ? 'Nenhum anúncio cadastrado.'
-            : `${listings.length} ${listings.length === 1 ? 'anúncio' : 'anúncios'} · ${published} publicados`
+            : `${listings.length} ${listings.length === 1 ? 'anúncio' : 'anúncios'} · ${published} publicados${unlisted ? ` · ${unlisted} não listados` : ''}`
         }
         action={{ href: '/pmpv-td9u-gebz/listings/new', label: '+ Novo anúncio' }}
       />
@@ -121,12 +122,14 @@ export default async function AdminListingsPage({
                           <input type="hidden" name="id" value={l.id} />
                           <button
                             title={
-                              l.published
-                                ? 'Publicado. Clique para voltar a rascunho'
-                                : 'Rascunho. Clique para publicar'
+                              !l.published
+                                ? 'Rascunho. Clique para publicar'
+                                : l.unlisted
+                                ? 'Não listado. Clique para voltar a rascunho'
+                                : 'Publicado. Clique para voltar a rascunho'
                             }
                           >
-                            <StatusPill published={l.published} />
+                            <StatusPill published={l.published} unlisted={l.unlisted} />
                           </button>
                         </form>
                         {l.sold && (

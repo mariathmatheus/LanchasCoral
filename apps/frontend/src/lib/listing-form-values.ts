@@ -21,6 +21,7 @@ type ListingWithRelations = {
   heroImage: string | null
   sourceUrl: string | null
   published: boolean
+  unlisted: boolean
   sold: boolean
   order: number
   images: { url: string; alt: string | null }[]
@@ -49,6 +50,7 @@ export function toListingFormValues(l: ListingWithRelations): ListingFormValues 
     heroImage: l.heroImage,
     sourceUrl: l.sourceUrl,
     published: l.published,
+    unlisted: l.unlisted,
     sold: l.sold,
     order: l.order,
     images: l.images.map((i) => ({ url: i.url, alt: i.alt ?? undefined })),
@@ -76,6 +78,7 @@ export const EMPTY_LISTING: ListingFormValues = {
   heroImage: null,
   sourceUrl: null,
   published: true,
+  unlisted: false,
   sold: false,
   order: 0,
   images: [],

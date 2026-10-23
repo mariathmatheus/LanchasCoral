@@ -24,6 +24,7 @@ export default async function ListingView({
   locale: Locale
 }) {
   const listing = await getListingBySlug(slug)
+  // Não publicado → 404. Não listado → acessível por link direto.
   if (!listing || !listing.published) notFound()
 
   const t = getDict(locale).broker

@@ -34,6 +34,7 @@ type BoatWithRelations = {
   capOpenSeaNight: number | null
   performance: unknown
   published: boolean
+  unlisted: boolean
   order: number
   heroImage: string | null
   heroVideo: string | null
@@ -72,6 +73,7 @@ export function toFormValues(b: BoatWithRelations): BoatFormValues {
     capOpenSeaDay: b.capOpenSeaDay,
     capOpenSeaNight: b.capOpenSeaNight,
     published: b.published,
+    unlisted: b.unlisted,
     order: b.order,
     heroImage: b.heroImage,
     heroVideo: b.heroVideo,
@@ -110,6 +112,7 @@ export const emptyFormValues: BoatFormValues = {
   capOpenSeaDay: null,
   capOpenSeaNight: null,
   published: true,
+  unlisted: false,
   order: 0,
   heroImage: null,
   heroVideo: null,

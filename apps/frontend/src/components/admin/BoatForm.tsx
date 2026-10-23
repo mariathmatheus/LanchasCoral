@@ -41,6 +41,7 @@ export type BoatFormValues = {
   capOpenSeaDay: number | null
   capOpenSeaNight: number | null
   published: boolean
+  unlisted: boolean
   order: number
   heroImage: string | null
   heroVideo: string | null
@@ -204,15 +205,26 @@ export default function BoatForm({ action, values: v, families, submitLabel }: P
       <Section title="Publicação e SEO">
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label="Ordem de exibição" name="order" defaultValue={v.order} type="number" />
-          <label className="flex items-center gap-3 self-end pb-2.5">
-            <input
-              type="checkbox"
-              name="published"
-              defaultChecked={v.published}
-              className="h-4 w-4 rounded-[var(--radius-xs)] border-[var(--border-strong)] accent-[var(--color-ocean-700)]"
-            />
-            <span className="text-sm font-medium text-[var(--color-text-body)]">Publicado no site</span>
-          </label>
+          <div className="flex flex-wrap items-center gap-6 self-end pb-2.5">
+            <label className="flex items-center gap-3">
+              <input
+                type="checkbox"
+                name="published"
+                defaultChecked={v.published}
+                className="h-4 w-4 rounded-[var(--radius-xs)] border-[var(--border-strong)] accent-[var(--color-ocean-700)]"
+              />
+              <span className="text-sm font-medium text-[var(--color-text-body)]">Publicado no site</span>
+            </label>
+            <label className="flex items-center gap-3">
+              <input
+                type="checkbox"
+                name="unlisted"
+                defaultChecked={v.unlisted}
+                className="h-4 w-4 rounded-[var(--radius-xs)] border-[var(--border-strong)] accent-[var(--color-ocean-700)]"
+              />
+              <span className="text-sm font-medium text-[var(--color-text-body)]">Não listado</span>
+            </label>
+          </div>
         </div>
         <div className="mt-4 space-y-4">
           <Field

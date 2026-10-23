@@ -1,21 +1,24 @@
 import { prisma } from './prisma'
 import { toNum } from './format'
 
+/** Filtro padrão para itens visíveis publicamente (publicado e não-não-listado). */
+const VISIBLE = { published: true, unlisted: false } as const
+/** Filtro para itens acessíveis por link direto (publicado, independente de unlisted). */
+const ACCESSIBLE = { published: true } as const
+
 /**
- * Famílias do menu, com os modelos publicados de cada uma.
+ * Famílias do menu, com os modelos publicados e listados de cada uma.
  *
- * O `where` descarta família sem nenhum modelo publicado. Sem ele, uma família
- * criada por engano (ou que ficou órfã depois que o último modelo dela foi
- * apagado) virava um item vazio no menu e ainda vazava no HTML entregue ao
- * visitante, junto dos dados que o React usa para hidratar a página.
+ * Não listados ficam fora do menu — o ponto do recurso é não aparecer
+ * em nenhuma superfície de navegação pública.
  */
 export async function getNavFamilies() {
   return prisma.family.findMany({
-    where: { boats: { some: { published: true } } },
+    where: { boats: { some: VISIBLE } },
     orderBy: { order: 'asc' },
     include: {
       boats: {
-        where: { published: true },
+        where: VISIBLE,
         orderBy: { order: 'asc' },
         select: { slug: true, name: true, variant: true },
       },
@@ -25,7 +28,7 @@ export async function getNavFamilies() {
 
 export async function getBoats() {
   return prisma.boat.findMany({
-    where: { published: true },
+    where: VISIBLE,
     orderBy: { order: 'asc' },
     include: { family: true, images: { orderBy: { order: 'asc' }, take: 1 } },
   })
@@ -42,8 +45,9 @@ export async function getBoatBySlug(slug: string) {
   })
 }
 
+/** Pré-renderiza só modelos visíveis publicamente; não listados renderizam on-demand. */
 export async function getBoatSlugs() {
-  return prisma.boat.findMany({ where: { published: true }, select: { slug: true } })
+  return prisma.boat.findMany({ where: VISIBLE, select: { slug: true } })
 }
 
 /** Display label: "Coral 36 – Cabinada". */
@@ -51,18 +55,16 @@ export const boatLabel = (b: { name: string; variant?: string | null }) =>
   [b.name, b.variant].filter(Boolean).join(' – ')
 
 /**
- * Families with their published boats, including the fields the line-up cards
- * render. Powers the /modelos page, which groups by family.
+ * Families with their published, listed boats.
+ * Powers the /modelos page — unlisted boats are excluded.
  */
 export async function getFamiliesWithBoats() {
   return prisma.family.findMany({
-    // Mesma razão de `getNavFamilies`: família sem modelo publicado não
-    // rende seção nenhuma na página, só um título solto.
-    where: { boats: { some: { published: true } } },
+    where: { boats: { some: VISIBLE } },
     orderBy: { order: 'asc' },
     include: {
       boats: {
-        where: { published: true },
+        where: VISIBLE,
         orderBy: { order: 'asc' },
         include: { images: { orderBy: { order: 'asc' }, take: 1 } },
       },
@@ -72,14 +74,14 @@ export async function getFamiliesWithBoats() {
 
 /**
  * "Modelos próximos": the boats nearest in hull length, same family first.
- * Falls back to catalogue order for boats with no length recorded.
+ * Unlisted boats are excluded from suggestions.
  */
 export async function getSiblingBoats(
   boat: { id: string; familyId: string | null; lengthM: unknown },
   take = 3,
 ) {
   const others = await prisma.boat.findMany({
-    where: { published: true, id: { not: boat.id } },
+    where: { ...VISIBLE, id: { not: boat.id } },
     orderBy: { order: 'asc' },
     include: { images: { orderBy: { order: 'asc' }, take: 1 } },
   })
@@ -92,7 +94,6 @@ export async function getSiblingBoats(
       return {
         boat: b,
         sameFamily: boat.familyId !== null && b.familyId === boat.familyId,
-        // Unknown lengths sort last rather than pretending to be a perfect match.
         distance: len !== null && bLen !== null ? Math.abs(bLen - len) : Number.POSITIVE_INFINITY,
       }
     })
@@ -105,8 +106,6 @@ export async function getSiblingBoats(
 
 /**
  * Resolve os campos de texto de um barco para o idioma pedido.
- * Campos *En vazios caem no português — assim o site em inglês nunca
- * fica com buraco enquanto a tradução do catálogo não é preenchida.
  */
 export function localizeBoat<
   T extends {
@@ -137,10 +136,10 @@ export function localizeEquipment<T extends { text: string; textEn?: string | nu
 
 /* ---------------- Coral Broker: seminovos ---------------- */
 
-/** Anúncios publicados, na ordem definida no admin. */
+/** Anúncios visíveis publicamente (publicados e listados). */
 export async function getListings() {
   return prisma.listing.findMany({
-    where: { published: true },
+    where: VISIBLE,
     orderBy: [{ sold: 'asc' }, { order: 'asc' }],
     include: { images: { orderBy: { order: 'asc' }, take: 1 } },
   })
@@ -156,24 +155,25 @@ export async function getListingBySlug(slug: string) {
   })
 }
 
+/** Pré-renderiza só anúncios visíveis; não listados renderizam on-demand. */
 export async function getListingSlugs() {
-  return prisma.listing.findMany({ where: { published: true }, select: { slug: true } })
+  return prisma.listing.findMany({ where: VISIBLE, select: { slug: true } })
 }
 
-/** Outros anúncios, para o rodapé da página de detalhe. */
+/** Outros anúncios relacionados — exclui não listados. */
 export async function getRelatedListings(id: string, take = 3) {
   return prisma.listing.findMany({
-    where: { published: true, sold: false, id: { not: id } },
+    where: { ...VISIBLE, sold: false, id: { not: id } },
     orderBy: { order: 'asc' },
     take,
     include: { images: { orderBy: { order: 'asc' }, take: 1 } },
   })
 }
 
-/** Valores presentes no estoque, para montar os filtros sem hardcode. */
+/** Facets para filtros do broker — exclui não listados. */
 export async function getListingFacets() {
   const rows = await prisma.listing.findMany({
-    where: { published: true },
+    where: VISIBLE,
     select: { brand: true, year: true, sizeFt: true, kind: true, engineType: true },
   })
   const uniq = <T,>(xs: (T | null)[]) => [...new Set(xs.filter((x): x is T => x != null))]
@@ -215,14 +215,11 @@ export function localizeArticle<T extends {
 
 /**
  * Modelos que podem ter o memorial descritivo solicitado.
- *
- * Filtra por `published` e por ter `manualUrl`: um modelo fora de linha, ou
- * cujo memorial ainda não foi anexado, não deve aparecer na lista — o
- * visitante pediria um arquivo que ninguém tem para enviar.
+ * Exclui não listados — o formulário público não deve expor modelos privados.
  */
 export async function getModelosComMemorial() {
   const boats = await prisma.boat.findMany({
-    where: { published: true, manualUrl: { not: null } },
+    where: { ...VISIBLE, manualUrl: { not: null } },
     orderBy: [{ family: { order: 'asc' } }, { order: 'asc' }],
     select: { slug: true, name: true, variant: true, manualUrl: true },
   })
@@ -232,3 +229,6 @@ export async function getModelosComMemorial() {
     manualUrl: b.manualUrl!,
   }))
 }
+
+// Exportado para uso nas views de detalhe (verifica se é acessível por link)
+export { ACCESSIBLE }

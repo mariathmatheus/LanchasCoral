@@ -93,6 +93,7 @@ function scalars(d: BoatInput) {
     // banco), por isso o Prisma exige este marcador explícito.
     performance: d.performance.length ? d.performance : Prisma.DbNull,
     published: d.published,
+    unlisted: d.unlisted,
     order: d.order,
     heroImage: d.heroImage ?? d.images[0]?.url ?? null,
     heroVideo: d.heroVideo ?? null,

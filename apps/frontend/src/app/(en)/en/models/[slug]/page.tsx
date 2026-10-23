@@ -22,16 +22,16 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   return {
     title: label,
     description: boat.tagline ?? `${label}: specifications, equipment and gallery.`,
-    alternates: alternatesEn(`/modelos/${boat.slug}`, `/en/models/${boat.slug}`),
-    openGraph: ogDeProduto({
+    robots: raw.unlisted ? { index: false, follow: false } : undefined,
+    alternates: raw.unlisted ? undefined : alternatesEn(`/modelos/${boat.slug}`, `/en/models/${boat.slug}`),
+    openGraph: raw.unlisted ? undefined : ogDeProduto({
       titulo: label,
       descricao: boat.seoDescription ?? boat.tagline ?? `Discover the ${label}.`,
       url: `/en/models/${boat.slug}`,
-      // A fotografia nao muda com o idioma: aponta para a rota em portugues.
       imagem: `/modelos/${boat.slug}/og`,
       locale: 'en_US',
     }),
-    twitter: { card: 'summary_large_image', images: [`/modelos/${boat.slug}/og`] },
+    twitter: raw.unlisted ? undefined : { card: 'summary_large_image', images: [`/modelos/${boat.slug}/og`] },
   }
 }
 

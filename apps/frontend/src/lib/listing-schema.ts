@@ -74,6 +74,7 @@ export const listingSchema = z.object({
   sourceUrl: optStr,
 
   published: z.boolean(),
+  unlisted: z.boolean(),
   sold: z.boolean(),
   order: z.preprocess((v) => (v === '' || v == null ? 0 : Number(v)), z.number().int()),
 
@@ -101,10 +102,11 @@ export function parseListingForm(fd: FormData) {
   }
   const obj: Record<string, unknown> = {}
   for (const [k, v] of fd.entries()) {
-    if (['images', 'accessories', 'published', 'sold'].includes(k)) continue
+    if (['images', 'accessories', 'published', 'unlisted', 'sold'].includes(k)) continue
     obj[k] = v
   }
   obj.published = fd.get('published') === 'on' || fd.get('published') === 'true'
+  obj.unlisted = fd.get('unlisted') === 'on' || fd.get('unlisted') === 'true'
   obj.sold = fd.get('sold') === 'on' || fd.get('sold') === 'true'
   obj.images = json('images')
   obj.accessories = json('accessories')

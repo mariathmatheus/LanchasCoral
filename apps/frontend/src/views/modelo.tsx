@@ -32,6 +32,7 @@ type Perf = { label: string; fuel: string | null; cruiseLh: number | null; avgLh
 
 export default async function BoatView({ slug, locale }: { slug: string; locale: Locale }) {
   const raw = await getBoatBySlug(slug)
+  // Não publicado → 404. Não listado → acessível por link direto.
   if (!raw || !raw.published) notFound()
 
   const t = getDict(locale).boat

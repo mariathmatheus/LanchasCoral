@@ -19,19 +19,20 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   if (!l) return {}
 
   const price = l.priceBrl ? `, ${brl(l.priceBrl)}` : ''
+  const desc = `${l.title}${price}. Pre-owned boat brokered by Coral.`
   return {
     title: l.title,
-    description: `${l.title}${price}. Pre-owned boat brokered by Coral.`,
-    alternates: alternatesEn(`/broker/${l.slug}`, `/en/broker/${l.slug}`),
-    openGraph: ogDeProduto({
+    description: desc,
+    robots: l.unlisted ? { index: false, follow: false } : undefined,
+    alternates: l.unlisted ? undefined : alternatesEn(`/broker/${l.slug}`, `/en/broker/${l.slug}`),
+    openGraph: l.unlisted ? undefined : ogDeProduto({
       titulo: l.title,
-      descricao: `${l.title}${price}. Pre-owned boat brokered by Coral.`,
+      descricao: desc,
       url: `/en/broker/${l.slug}`,
-      // Mesma fotografia nas duas linguas: reusa a rota em portugues.
       imagem: `/broker/${l.slug}/og`,
       locale: 'en_US',
     }),
-    twitter: { card: 'summary_large_image', images: [`/broker/${l.slug}/og`] },
+    twitter: l.unlisted ? undefined : { card: 'summary_large_image', images: [`/broker/${l.slug}/og`] },
   }
 }
 

@@ -23,15 +23,17 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
     title: boat.seoTitle ?? label,
     description:
       boat.seoDescription ?? boat.tagline ?? `Conheça a ${label}: especificações, equipamentos e galeria.`,
-    alternates: alternates(`/modelos/${boat.slug}`, `/en/models/${boat.slug}`),
-    openGraph: ogDeProduto({
+    // Não listado: bloqueia indexação mas mantém a página acessível por link
+    robots: boat.unlisted ? { index: false, follow: false } : undefined,
+    alternates: boat.unlisted ? undefined : alternates(`/modelos/${boat.slug}`, `/en/models/${boat.slug}`),
+    openGraph: boat.unlisted ? undefined : ogDeProduto({
       titulo: label,
       descricao: boat.seoDescription ?? boat.tagline ?? `Conheça a ${label}.`,
       url: `/modelos/${boat.slug}`,
       imagem: `/modelos/${boat.slug}/og`,
       locale: 'pt_BR',
     }),
-    twitter: { card: 'summary_large_image', images: [`/modelos/${boat.slug}/og`] },
+    twitter: boat.unlisted ? undefined : { card: 'summary_large_image', images: [`/modelos/${boat.slug}/og`] },
   }
 }
 
