@@ -258,6 +258,18 @@ model ListingAccessory {
   @@index([listingId, order])
 }
 
+/// IPs bloqueados automaticamente por reincidência no honeypot ou
+/// por força-bruta no login. O middleware consulta esta tabela (com cache
+/// de 60 s) e retorna 403 para qualquer rota que não seja estática.
+model BlockedIp {
+  id        String   @id @default(cuid())
+  ip        String   @unique
+  reason    String
+  createdAt DateTime @default(now())
+
+  @@index([ip])
+}
+
 /// Registro de tentativas de login, para travar ataques de forca bruta.
 /// Guarda apenas o identificador tentado e a origem — nunca a senha.
 model LoginAttempt {
