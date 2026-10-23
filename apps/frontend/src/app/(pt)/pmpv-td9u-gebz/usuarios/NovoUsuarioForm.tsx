@@ -36,7 +36,7 @@ export function NovoUsuarioForm() {
       <div>
         <label className="block text-sm font-medium text-[var(--color-text-body)]">Senha provisória *</label>
         <input name="password" type="password" required minLength={8} autoComplete="new-password" className={inputCls} />
-        <p className="mt-1 text-xs text-[var(--text-muted)]">Mínimo 8 caracteres. O usuário poderá redefinir via "Esqueceu a senha?".</p>
+        <p className="mt-1 text-xs text-[var(--text-muted)]">Mínimo 8 caracteres. O usuário poderá redefinir via &ldquo;Esqueceu a senha?&rdquo;.</p>
       </div>
 
       <button
