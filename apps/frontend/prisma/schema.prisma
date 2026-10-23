@@ -116,6 +116,12 @@ model User {
   /// ADMIN: todas as edições, sem criar/excluir contas.
   /// VIEWER: sem acesso ao painel.
   role         Role     @default(VIEWER)
+
+  /// TOTP (RFC 6238) para autenticação de dois fatores.
+  /// Secret gerado com otplib; armazenado em base32 (20 bytes = 32 chars).
+  totpSecret   String?
+  totpEnabled  Boolean  @default(false)
+
   createdAt    DateTime @default(now())
 }
 

@@ -26,6 +26,10 @@ const ROOT_ITEMS: Item[] = [
   { href: '/pmpv-td9u-gebz/usuarios', label: 'Usuários' },
 ]
 
+const PROFILE_ITEMS: Item[] = [
+  { href: '/pmpv-td9u-gebz/perfil', label: 'Perfil' },
+]
+
 /**
  * `/admin` só está ativo em correspondência exata — senão ficaria aceso em
  * todas as rotas do painel, que é justamente o problema que queremos evitar.
@@ -37,7 +41,7 @@ function isActive(pathname: string, href: string) {
 
 export default function AdminNav({ role }: { role?: string }) {
   const pathname = usePathname() ?? ''
-  const items = role === 'ROOT' ? [...ITEMS, ...ROOT_ITEMS] : ITEMS
+  const items = [...ITEMS, ...(role === 'ROOT' ? ROOT_ITEMS : []), ...PROFILE_ITEMS]
 
   // `-mx-1 px-1`: a rolagem sobra ate a borda da tela quando os rotulos nao
   // cabem, em vez de cortar o ultimo item contra a caixa. Em telas estreitas
