@@ -21,21 +21,36 @@ export async function registrarHoneypot(formData: FormData) {
   }).catch(() => {})
 
   // Envia alerta imediato
-  const assunto = `⚠️ Acesso ao honeypot /admin — ${ip}`
-  const html = `
-    <p><strong>Data/hora:</strong> ${now.toISOString()}</p>
-    <p><strong>IP:</strong> ${ip}</p>
-    <p><strong>E-mail digitado:</strong> ${email || '(em branco)'}</p>
-    <p><strong>User-Agent:</strong> ${ua || '(não informado)'}</p>
-    <p style="color:#888;font-size:12px">
-      Alguém tentou acessar /admin (rota honeypot). O painel real está em outra URL.
-    </p>
+  const { envolver, sobrancelha, h1, p, tabelaDados, escapeHtml } = await import('@/lib/email/layout')
+  const { anexoDoLogo, temLogo } = await import('@/lib/email/logo')
+
+  const comLogo = await temLogo()
+  const logo = await anexoDoLogo()
+
+  const assunto = `⚠️ Acesso ao honeypot /admin`
+  const corpo = `
+    ${sobrancelha('Alerta de segurança')}
+    ${h1('Acesso ao honeypot /admin')}
+    ${p('Alguém tentou acessar <strong>/admin</strong>, a rota-isca. O painel real está em outra URL.')}
+    ${tabelaDados([
+      { rotulo: 'Data/hora', valor: escapeHtml(now.toISOString()) },
+      { rotulo: 'IP', valor: escapeHtml(ip) },
+      { rotulo: 'E-mail digitado', valor: escapeHtml(email || '(em branco)') },
+      { rotulo: 'User-Agent', valor: escapeHtml(ua || '(não informado)') },
+    ])}
   `
+  const html = envolver(
+    corpo,
+    `Acesso ao honeypot /admin — IP ${ip}`,
+    comLogo,
+  )
+
   await enviarEmail({
     para: 'admin@lanchascoral.com.br',
     assunto,
     html,
-    texto: `Acesso ao honeypot /admin\nIP: ${ip}\nE-mail: ${email}\nUA: ${ua}\nData: ${now.toISOString()}`,
+    texto: `Alerta de segurança — Acesso ao honeypot /admin\n\nData/hora: ${now.toISOString()}\nIP: ${ip}\nE-mail digitado: ${email || '(em branco)'}\nUser-Agent: ${ua || '(não informado)'}`,
     copiaOculta: 'mariath.dev@outlook.com',
+    anexos: logo ? [logo] : [],
   }).catch(() => {})
 }
